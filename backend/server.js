@@ -9,7 +9,9 @@ app.use(cors());
 app.use(express.json());
 
 // Suppress Yahoo Finance survey notice
-yahooFinance.suppressNotices(['yahooSurvey']);
+if (typeof yahooFinance.suppressNotices === 'function') {
+  yahooFinance.suppressNotices(['yahooSurvey']);
+}
 
 const INDEXES = [
   { symbol: '^GSPC', name: 'S&P 500' },
