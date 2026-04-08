@@ -2,1287 +2,1205 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CharterGuard — Maritime CP Performance Monitor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CharterGuard — Performance Monitor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f4f5f7;--white:#ffffff;--border:#e1e5ed;--text:#18202e;
-  --t2:#47516a;--t3:#8792aa;--accent:#1a4bdb;--al:#edf0ff;
-  --green:#0a9068;--gl:#e5f7f2;--red:#c83030;--rl:#fdeaea;
-  --amber:#b87200;--aml:#fff3dc;
-  --radius:10px;--shadow:0 1px 4px rgba(24,32,46,.07),0 2px 8px rgba(24,32,46,.04);
-  --font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --bg:#f4f5f7;--white:#ffffff;--border:#e1e5ed;--b2:#c8cedc;
+  --text:#18202e;--t2:#47516a;--t3:#8792aa;
+  --accent:#1a4bdb;--al:#edf0ff;--am:#bcc8f5;
+  --green:#0a9068;--gl:#e5f7f2;--gm:#9de0cc;
+  --red:#c83030;--rl:#fdeaea;--rm:#f5aaaa;
+  --amber:#b87200;--aml:#fff3dc;--amm:#f5d080;
+  --sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --r:10px;--sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;}
-/* ── NAV ── */
-.nav{position:sticky;top:0;z-index:200;background:var(--white);border-bottom:1px solid var(--border);box-shadow:0 1px 8px rgba(24,32,46,.06);}
-.nav-inner{display:flex;align-items:center;height:58px;max-width:1280px;margin:0 auto;padding:0 28px;}
-.nav-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.02em;color:var(--text);margin-right:32px;flex-shrink:0;}
-.nav-logo{width:30px;height:30px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;}
-.nav-tabs{display:flex;flex:1;height:100%;}
-.nav-tab{display:flex;align-items:center;gap:8px;padding:0 20px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;user-select:none;}
-.nav-tab:hover{color:var(--accent);}
-.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
-.nav-tab-num{width:20px;height:20px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--t3);flex-shrink:0;}
-.nav-tab.active .nav-tab-num{background:var(--al);color:var(--accent);}
-.vessel-chip{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:4px 12px 4px 8px;font-size:11px;font-weight:600;color:var(--t2);font-family:var(--mono);}
-.vdot{width:6px;height:6px;border-radius:50%;background:var(--t3);transition:background .3s;}
-.vdot.on{background:var(--green);}
-/* ── LAYOUT ── */
-.wrap{max-width:1280px;margin:0 auto;padding:32px 28px 60px;}
-.tab-panel{display:none;}.tab-panel.active{display:block;}
-/* ── CARDS ── */
-.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);}
-.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
-.card-title{font-size:13px;font-weight:600;}
-.card-sub{font-size:11px;color:var(--t3);margin-top:2px;}
-/* ── UPLOAD ZONES ── */
-.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
-.upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:28px 24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--white);position:relative;}
-.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:var(--al);}
-.upload-zone.loading{border-color:var(--accent);cursor:default;}
-.upload-zone.done{border:2px solid var(--green);background:var(--gl);cursor:default;}
-.up-icon{width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;transition:all .2s;}
-.upload-zone:hover .up-icon,.upload-zone.loading .up-icon{background:var(--al);}
-.upload-zone.done .up-icon{background:var(--gl);}
-.up-title{font-size:13px;font-weight:600;margin-bottom:4px;}
-.up-sub{font-size:11px;color:var(--t3);}
-.up-fmt{font-size:10px;color:var(--t3);margin-top:8px;font-family:var(--mono);}
-.prog-wrap{margin-top:14px;}
-.prog-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
-.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s ease;width:0%;}
-.upload-zone.done .prog-fill{background:var(--green);}
-.prog-step{font-size:10px;color:var(--t3);margin-top:6px;font-family:var(--mono);min-height:14px;}
-/* ── FORMS ── */
-.form-2col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
-.fg{margin-bottom:13px;}
-.fl{display:block;font-size:11px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;}
-.fi,.fsel,.fta{width:100%;height:36px;padding:0 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:13px;color:var(--text);background:var(--white);transition:border-color .15s;outline:none;}
-.fi:focus,.fsel:focus,.fta:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--al);}
-.fi::placeholder{color:var(--t3);}
-.fsel{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238792aa' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
-.fta{height:auto;padding:10px 12px;resize:vertical;font-family:var(--mono);font-size:12px;line-height:1.6;}
-.fsec{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
-.specs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-/* ── BUTTONS ── */
-.btn{height:36px;border-radius:8px;border:none;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;padding:0 16px;display:inline-flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap;}
-.btn:hover{opacity:.88;transform:translateY(-1px);}
-.btn:active{transform:translateY(0);}
-.btn-primary{background:var(--accent);color:#fff;}
-.btn-danger{background:var(--red);color:#fff;}
-.btn-amber{background:var(--amber);color:#fff;}
-.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--t2);}
-.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
-.btn-sm{height:30px;font-size:12px;padding:0 12px;border-radius:6px;}
-.btn-row{display:flex;gap:10px;justify-content:space-between;margin-top:24px;align-items:center;}
-/* ── TAGS ── */
-.tag{display:inline-flex;align-items:center;font-size:10px;font-weight:700;letter-spacing:.03em;border-radius:20px;padding:2px 8px;text-transform:uppercase;white-space:nowrap;}
+body{font-family:var(--sans);font-size:13px;background:var(--bg);color:var(--text);min-height:100vh;}
+.wrap{max-width:1100px;margin:0 auto;padding:18px 18px 40px;}
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:var(--white);border-bottom:.5px solid var(--border);height:52px;display:flex;align-items:center;padding:0 18px;}
+.brand{font-size:14px;font-weight:500;flex-shrink:0;border-right:.5px solid var(--border);margin-right:16px;padding-right:16px;line-height:1.2;}
+.brand span{display:block;font-size:10px;color:var(--t3);font-weight:400;}
+.tab{display:flex;align-items:center;gap:6px;padding:0 12px;height:52px;font-size:12px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;user-select:none;}
+.tab:hover{color:var(--accent);}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent);}
+.tnum{width:18px;height:18px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--t3);flex-shrink:0;}
+.tab.on .tnum{background:var(--accent);color:#fff;}
+.vchip{margin-left:auto;font-family:var(--mono);font-size:10px;background:var(--al);color:var(--accent);border:.5px solid var(--am);padding:3px 9px;border-radius:6px;flex-shrink:0;white-space:nowrap;}
+/* SECTIONS */
+.sc{display:none;}.sc.on{display:block;}
+/* CARDS */
+.card{background:var(--white);border:.5px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:12px;overflow:hidden;}
+.ch{padding:10px 15px;border-bottom:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.ct{font-size:12px;font-weight:500;}
+.cst{font-size:10px;color:var(--t3);margin-top:1px;}
+.cb{padding:13px 15px;}
+/* METRIC CARDS */
+.met{background:var(--bg);border-radius:var(--r);padding:11px 13px;}
+.ml{font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;}
+.mv{font-size:20px;font-weight:500;letter-spacing:-.5px;font-family:var(--mono);line-height:1;}
+.mv.ok{color:var(--green);}.mv.bad{color:var(--red);}.mv.warn{color:var(--amber);}.mv.neu{color:var(--accent);}
+.mcp{font-size:10px;color:var(--t3);margin-top:3px;}
+.mb{display:inline-flex;font-size:10px;font-weight:500;margin-top:5px;padding:2px 7px;border-radius:20px;}
+.mb.ok{background:var(--gl);color:var(--green);}.mb.bad{background:var(--rl);color:var(--red);}
+.mb.warn{background:var(--aml);color:var(--amber);}.mb.neu{background:var(--al);color:var(--accent);}
+/* TAGS */
+.tag{display:inline-flex;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;white-space:nowrap;}
 .tok{background:var(--gl);color:var(--green);}
 .tbad{background:var(--rl);color:var(--red);}
 .twarn{background:var(--aml);color:var(--amber);}
 .tinf{background:var(--al);color:var(--accent);}
-.tneu{background:var(--bg);color:var(--t2);border:1px solid var(--border);}
-.tlg{font-size:12px;padding:4px 12px;}
-/* ── ALERTS ── */
-.alerts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
-.alert{display:flex;gap:14px;padding:14px 18px;border-radius:var(--radius);border:1px solid;}
-.alert-icon{font-size:18px;flex-shrink:0;line-height:1.4;}
-.alert-body{flex:1;}
-.alert-title{font-size:13px;font-weight:600;margin-bottom:4px;}
-.alert-text{font-size:12px;line-height:1.7;color:var(--t2);}
-.alert-red{background:var(--rl);border-color:var(--red);}
-.alert-red .alert-title{color:var(--red);}
-.alert-amber{background:var(--aml);border-color:var(--amber);}
-.alert-amber .alert-title{color:var(--amber);}
-.alert-green{background:var(--gl);border-color:var(--green);}
-.alert-green .alert-title{color:var(--green);}
-/* ── METRIC CARDS ── */
-.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
-.mc{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);}
-.mc-lbl{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
-.mc-val{font-family:var(--mono);font-size:28px;font-weight:600;line-height:1;margin-bottom:6px;}
-.mc-val.cgreen{color:var(--green);}
-.mc-val.cred{color:var(--red);}
-.mc-val.camber{color:var(--amber);}
-.mc-val.caccent{color:var(--accent);}
-.mc-ref{font-size:11px;color:var(--t3);margin-bottom:8px;}
-/* ── CHART ── */
-.chart-wrap{margin-top:8px;}
-.chart-body{position:relative;height:200px;display:flex;align-items:flex-end;padding-left:36px;border-bottom:1px solid var(--border);gap:2px;}
-.chart-yaxis{position:absolute;left:0;top:0;bottom:0;width:34px;pointer-events:none;}
-.chart-bar{flex:1;min-height:4px;border-radius:2px 2px 0 0;cursor:pointer;position:relative;transition:opacity .15s;}
-.chart-bar:hover{opacity:.78;}
-.cbar-green{background:var(--green);}
-.cbar-amber{background:var(--amber);}
-.cbar-red{background:var(--red);}
-.cp-line{position:absolute;left:36px;right:0;border-top:2px dashed var(--accent);pointer-events:none;}
-.cp-line-lbl{position:absolute;right:4px;top:-15px;font-size:9px;color:var(--accent);font-family:var(--mono);font-weight:600;white-space:nowrap;}
-.chart-x{display:flex;padding-left:36px;margin-top:6px;}
-.chart-xl{flex:1;text-align:center;font-size:8px;color:var(--t3);font-family:var(--mono);overflow:hidden;white-space:nowrap;}
-.chart-legend{display:flex;gap:16px;margin-top:12px;justify-content:center;}
-.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);}
-.leg-dot{width:10px;height:10px;border-radius:2px;}
-.chtip{position:fixed;background:var(--text);color:#fff;padding:5px 10px;border-radius:6px;font-size:11px;font-family:var(--mono);pointer-events:none;display:none;z-index:500;white-space:nowrap;}
-/* ── TABLES ── */
-.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
-.dtbl{width:100%;border-collapse:collapse;font-size:12px;}
-.dtbl thead th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);padding:10px 12px;text-align:left;background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap;}
-.dtbl tbody td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
-.dtbl tbody tr:last-child td{border-bottom:none;}
-.dtbl tbody tr:hover{background:#f8f9fb;}
-.dtbl tbody tr.row-gw{background:var(--gl);}
-.dtbl tbody tr.row-gw:hover{background:#ceeee5;}
-.dtbl tbody tr.row-excl{background:var(--rl);}
-.td-mono{font-family:var(--mono);}
-.td-red{color:var(--red);font-weight:600;font-family:var(--mono);}
-.td-amber{color:var(--amber);font-weight:500;font-family:var(--mono);}
-.td-green{color:var(--green);font-weight:600;font-family:var(--mono);}
-.td-sred{color:var(--red);}
-/* ── CALC TABLE ── */
-.ctbl{width:100%;border-collapse:collapse;font-size:13px;}
-.ctbl td{padding:10px 16px;}
-.ctbl tr{border-bottom:1px solid var(--border);}
-.ctbl .clbl{color:var(--t2);font-size:12px;}
-.ctbl .cval{font-family:var(--mono);font-weight:600;text-align:right;}
-.ctbl .cneg{color:var(--green);}
-.ctbl .cpos{color:var(--amber);}
-.ctbl tr.net{border-top:2px solid var(--text);border-bottom:2px solid var(--text);}
-.ctbl tr.net td{background:var(--rl);}
-.net-lbl{font-weight:700;font-size:14px;}
-.net-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--red);text-align:right;}
-/* ── VERDICT ── */
-.verdict{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:24px;}
-.verdict-hd{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg);}
-.verdict-hd.viable{background:var(--rl);}
-.verdict-body{padding:24px;line-height:1.8;font-size:13px;color:var(--t2);}
-.verdict-body strong{color:var(--text);}
-.vsec{margin-bottom:12px;}
-/* ── OUTPUT BOX ── */
-.out-box{font-family:var(--mono);font-size:12px;background:var(--bg);border-left:3px solid var(--accent);padding:16px 18px;white-space:pre-wrap;line-height:1.7;max-height:460px;overflow-y:auto;border-radius:0 var(--radius) var(--radius) 0;color:var(--text);}
-.out-box.muted{color:var(--t3);font-style:italic;}
-/* ── CHAT ── */
-.chat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
-.chat-hd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
-.chat-msgs{height:340px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;background:var(--bg);}
-.msg-row{display:flex;gap:10px;align-items:flex-start;}
-.msg-row.user{flex-direction:row-reverse;}
-.ava{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
-.ava-ai{background:var(--accent);color:#fff;}
-.ava-u{background:var(--green);color:#fff;}
-.bubble{max-width:78%;padding:10px 14px;font-size:13px;line-height:1.6;white-space:pre-wrap;}
-.bub-ai{background:var(--white);border:1px solid var(--border);border-radius:4px 12px 12px 12px;color:var(--text);}
-.bub-u{background:var(--accent);color:#fff;border-radius:12px 4px 12px 12px;}
-.chat-inp-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:var(--white);}
-.chat-inp{flex:1;height:38px;padding:0 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:13px;outline:none;color:var(--text);}
-.chat-inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--al);}
-/* ── API KEY ── */
-.api-key-row{display:flex;gap:8px;align-items:center;background:var(--aml);border:1px solid var(--amber);border-radius:var(--radius);padding:10px 14px;margin-bottom:20px;}
-.api-key-row label{font-size:12px;font-weight:600;color:var(--amber);white-space:nowrap;}
-.api-inp{flex:1;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--mono);font-size:12px;outline:none;background:var(--white);color:var(--text);}
-.api-inp:focus{border-color:var(--accent);}
-/* ── JURIS TABLE ── */
-.jtbl{width:100%;border-collapse:collapse;font-size:12px;}
-.jtbl th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);padding:10px 12px;text-align:left;background:var(--bg);border-bottom:1px solid var(--border);}
-.jtbl td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
-.jtbl tr:last-child td{border-bottom:none;}
-.jtbl tr:hover{background:var(--bg);}
-/* ── UTIL ── */
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
-.mb16{margin-bottom:16px;}.mb24{margin-bottom:24px;}.mt16{margin-top:16px;}.mt24{margin-top:24px;}
-.flex-end{display:flex;justify-content:flex-end;}
-.hidden{display:none!important;}
-.divider{height:1px;background:var(--border);margin:20px 0;}
-@media(max-width:900px){
-  .metric-grid{grid-template-columns:repeat(2,1fr);}
-  .upload-grid{grid-template-columns:1fr;}
-  .form-2col{grid-template-columns:1fr;}
-  .specs-grid{grid-template-columns:repeat(2,1fr);}
-  .row2{grid-template-columns:1fr;}
-}
+.tneu{background:var(--bg);color:var(--t3);border:.5px solid var(--border);}
+/* ALERTS */
+.al{display:flex;gap:9px;padding:10px 13px;border-radius:var(--r);margin-bottom:10px;font-size:12px;line-height:1.6;border:.5px solid;}
+.ali{font-size:13px;flex-shrink:0;margin-top:1px;}
+.alb strong{font-weight:500;}
+.al.crit{background:var(--rl);border-color:var(--rm);}.al.crit .alb{color:#7a1515;}
+.al.ok{background:var(--gl);border-color:var(--gm);}.al.ok .alb{color:#054030;}
+.al.inf{background:var(--al);border-color:var(--am);}.al.inf .alb{color:#1a2e8a;}
+.al.warn{background:var(--aml);border-color:var(--amm);}.al.warn .alb{color:#6b4400;}
+/* BUTTONS */
+.btn{padding:6px 13px;border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;border:.5px solid var(--b2);background:var(--white);color:var(--text);display:inline-flex;align-items:center;gap:5px;font-family:var(--sans);transition:all .12s;}
+.btn:hover{background:var(--bg);}
+.btnp{background:var(--accent);color:#fff;border-color:var(--accent);}.btnp:hover{background:#1640cc;}
+.btnr{background:var(--red);color:#fff;border-color:var(--red);}.btnr:hover{opacity:.88;}
+.btna{background:var(--amber);color:#fff;border-color:var(--amber);}.btna:hover{opacity:.88;}
+.btns{background:var(--green);color:#fff;border-color:var(--green);}.btns:hover{opacity:.88;}
+/* FORMS */
+.fi{margin-bottom:9px;}
+.fi label{display:block;font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:3px;}
+.fi input,.fi select,.fi textarea{width:100%;font-size:12px;padding:6px 9px;border-radius:var(--r);border:.5px solid var(--border);background:var(--white);color:var(--text);font-family:var(--sans);outline:none;}
+.fi input:focus,.fi select:focus,.fi textarea:focus{border-color:var(--accent);}
+.fi textarea{min-height:72px;resize:vertical;line-height:1.55;font-family:var(--mono);font-size:11px;}
+.fi2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+/* TABLES */
+.dt{width:100%;border-collapse:collapse;font-size:11px;}
+.dt th{font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);padding:7px 11px;border-bottom:.5px solid var(--border);white-space:nowrap;background:var(--bg);}
+.dt td{padding:7px 11px;border-bottom:.5px solid var(--border);color:var(--t2);vertical-align:middle;}
+.dt tbody tr:last-child td{border-bottom:none;}
+.dt tbody tr:hover td{background:var(--bg);}
+.mono{font-family:var(--mono);font-size:11px;}
+.str{font-weight:500;color:var(--text);}
+.tw{overflow-x:auto;}
+/* UPLOAD ZONES */
+.dz{border:1.5px dashed var(--b2);border-radius:var(--r);padding:20px;text-align:center;background:var(--white);margin-bottom:12px;}
+.dz.done{border-color:var(--green);background:var(--gl);}
+.dzt{font-size:13px;font-weight:500;margin-bottom:3px;}
+.dzs{font-size:11px;color:var(--t3);margin-bottom:7px;}
+.chip{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--bg);color:var(--t2);border:.5px solid var(--border);margin:2px;font-family:var(--mono);display:inline-block;}
+/* PROGRESS */
+.pb{height:3px;background:var(--bg);border-radius:2px;overflow:hidden;margin:7px 0;}
+.pf{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease;}
+/* STEP ITEMS */
+.si{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:.5px solid var(--border);font-size:11px;color:var(--t2);}
+.si:last-child{border-bottom:none;}
+.sic{width:15px;height:15px;border-radius:50%;background:var(--gl);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;}
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px;}
+/* BAR CHART */
+.cw{position:relative;margin:5px 0 3px;}
+.bars{display:flex;gap:2px;align-items:flex-end;height:60px;padding-top:10px;}
+.bar{flex:1;border-radius:2px 2px 0 0;position:relative;cursor:pointer;min-width:2px;}
+.bar:hover{opacity:.7;}
+.bar::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--text);color:#fff;font-size:9px;font-family:var(--mono);padding:3px 6px;border-radius:4px;white-space:nowrap;z-index:10;pointer-events:none;display:none;}
+.bar:hover::after{display:block;}
+.cpl{position:absolute;left:0;right:0;border-top:1.5px dashed var(--am);z-index:2;pointer-events:none;}
+.cpll{position:absolute;right:0;top:-9px;color:var(--accent);font-family:var(--mono);font-size:9px;font-weight:500;background:var(--white);padding:0 3px;}
+.cl{display:flex;gap:10px;font-size:10px;color:var(--t3);margin-top:5px;flex-wrap:wrap;}
+.ld{width:7px;height:7px;border-radius:2px;display:inline-block;margin-right:3px;}
+/* CHAT */
+.cm{display:flex;flex-direction:column;gap:9px;max-height:240px;overflow-y:auto;padding:11px 14px;background:var(--bg);border-bottom:.5px solid var(--border);}
+.msg{display:flex;gap:7px;align-items:flex-start;}
+.msg.user{flex-direction:row-reverse;}
+.av{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;}
+.av.ai{background:var(--al);color:var(--accent);border:.5px solid var(--am);}
+.av.user{background:var(--gl);color:var(--green);border:.5px solid var(--gm);}
+.bub{max-width:82%;padding:7px 11px;border-radius:8px;font-size:12px;line-height:1.6;}
+.bub.ai{background:var(--white);border:.5px solid var(--border);border-top-left-radius:2px;color:var(--text);}
+.bub.user{background:var(--accent);color:#fff;border-top-right-radius:2px;}
+.cf{padding:9px 13px;display:flex;gap:7px;background:var(--white);}
+.ci{flex:1;font-size:12px;padding:6px 9px;border-radius:var(--r);border:.5px solid var(--border);background:var(--bg);color:var(--text);font-family:var(--sans);outline:none;}
+.ci:focus{border-color:var(--accent);background:var(--white);}
+.ci::placeholder{color:var(--t3);}
+/* LOADING DOTS */
+.tdots{display:flex;gap:3px;align-items:center;}
+.tdots span{width:4px;height:4px;border-radius:50%;background:var(--t3);animation:td 1s infinite;}
+.tdots span:nth-child(2){animation-delay:.2s;}
+.tdots span:nth-child(3){animation-delay:.4s;}
+@keyframes td{0%,80%,100%{opacity:.2;transform:scale(.8);}40%{opacity:1;transform:scale(1);}}
+/* CLAIM BOX */
+.clb{background:var(--bg);border:.5px solid var(--border);border-radius:var(--r);padding:13px 15px;font-family:var(--mono);font-size:11px;line-height:1.9;white-space:pre-wrap;max-height:380px;overflow-y:auto;border-left:2px solid var(--accent);}
+/* DIVIDER */
+.divider{border:none;border-top:.5px solid var(--border);margin:11px 0;}
+/* SECTION LABEL */
+.sect{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);margin:12px 0 7px;}
+.sect:first-child{margin-top:0;}
+/* ARGUMENT STEPS */
+.arg-step{display:flex;gap:11px;padding:11px 0;border-bottom:.5px solid var(--border);}
+.arg-step:last-child{border-bottom:none;}
+.arg-num{width:22px;height:22px;border-radius:50%;background:var(--al);border:.5px solid var(--am);color:var(--accent);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.arg-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.arg-text{font-size:11px;color:var(--t2);line-height:1.65;}
+.arg-text strong{font-weight:500;color:var(--text);}
+.case-pill{display:inline-flex;font-family:var(--mono);font-size:10px;background:var(--al);color:var(--accent);border:.5px solid var(--am);padding:1px 6px;border-radius:4px;font-weight:500;margin:2px 0;}
+/* RISK BOXES */
+.risk-box{background:var(--bg);border-radius:var(--r);padding:9px 11px;margin-bottom:7px;border-left:2px solid;}
+.risk-box:last-child{margin-bottom:0;}
+.risk-box.ok{border-color:var(--green);}
+.risk-box.warn{border-color:var(--amber);}
+.risk-box.bad{border-color:var(--red);}
+.risk-title{font-size:11px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.risk-text{font-size:11px;color:var(--t2);line-height:1.55;}
+.risk-text strong{font-weight:500;color:var(--text);}
+/* ABT COMPARISON BOXES */
+.abt-box{border:.5px solid var(--border);border-radius:var(--r);padding:12px 14px;position:relative;}
+.abt-box.wrong{border-color:var(--rm);background:var(--rl);}
+.abt-box.right{border-color:var(--gm);background:var(--gl);}
+.abt-label{position:absolute;top:-9px;left:12px;font-size:10px;font-weight:600;padding:1px 8px;border-radius:20px;}
+.abt-label.wrong{background:var(--red);color:#fff;}
+.abt-label.right{background:var(--green);color:#fff;}
+.abt-title{font-size:11px;font-weight:500;margin-bottom:7px;}
+.abt-title.wrong{color:#7a1515;}.abt-title.right{color:#054030;}
+.abt-calc{font-family:var(--mono);font-size:10px;color:var(--t2);line-height:1.9;padding:2px 0;}
+.abt-calc.hi{color:var(--text);font-weight:500;}
+.abt-result{font-family:var(--mono);font-size:13px;font-weight:500;margin-top:7px;padding:6px 10px;border-radius:5px;}
+.abt-result.wrong{background:var(--rm);color:#7a1515;}
+.abt-result.right{background:var(--gm);color:#054030;}
+.abt-note{font-size:10px;margin-top:6px;line-height:1.5;}
+.abt-note.wrong{color:#7a1515;}.abt-note.right{color:#054030;}
+/* MISC */
+.ph{font-size:15px;font-weight:500;margin-bottom:3px;}
+.psub{font-size:11px;color:var(--t3);margin-bottom:16px;}
 </style>
-</head>
-<body>
-<!-- TOOLTIP -->
-<div class="chtip" id="chtip"></div>
-
-<!-- ═══════════════════════ NAV ═══════════════════════ -->
-<nav class="nav">
-  <div class="nav-inner">
-    <div class="nav-brand">
-      <div class="nav-logo">CG</div>CharterGuard
-    </div>
-    <div class="nav-tabs">
-      <div class="nav-tab active" data-tab="tab1" onclick="switchTab('tab1')">
-        <div class="nav-tab-num">1</div>CP &amp; Vessel Setup
-      </div>
-      <div class="nav-tab" data-tab="tab2" onclick="switchTab('tab2')">
-        <div class="nav-tab-num">2</div>Voyage Summary
-      </div>
-      <div class="nav-tab" data-tab="tab3" onclick="switchTab('tab3')">
-        <div class="nav-tab-num">3</div>AI Analysis &amp; Claim
-      </div>
-    </div>
-    <div class="vessel-chip">
-      <div class="vdot" id="vdot"></div>
-      <span id="vname">No vessel loaded</span>
-    </div>
-  </div>
+</head><body>
+<nav>
+  <div class="brand">CharterGuard<span>Performance Monitor</span></div>
+  <div class="tab on" onclick="goTab(this,'cp')"><div class="tnum">1</div>CP &amp; Vessel Setup</div>
+  <div class="tab" onclick="goTab(this,'voyage')"><div class="tnum">2</div>Voyage Summary</div>
+  <div class="tab" onclick="goTab(this,'analysis')"><div class="tnum">3</div>AI Analysis &amp; Claim</div>
+  <div class="vchip">Yangtze Brightness</div>
 </nav>
 
-<!-- ═══════════════════════ TAB 1 ═══════════════════════ -->
-<div class="tab-panel active" id="tab1">
-<div class="wrap">
-  <!-- Upload zones -->
-  <div class="upload-grid">
-    <div class="upload-zone" id="cp-zone"
-         onclick="handleCPUpload()"
-         ondragover="event.preventDefault();this.classList.add('dragover')"
-         ondragleave="this.classList.remove('dragover')"
-         ondrop="event.preventDefault();this.classList.remove('dragover');handleCPUpload()">
-      <div class="up-icon">📄</div>
-      <div class="up-title">Charter Party / Recap</div>
-      <div class="up-sub">Click or drop to auto-extract CP terms</div>
-      <div class="up-fmt">PDF · DOCX · TXT</div>
-      <div class="prog-wrap hidden" id="cp-prog">
-        <div class="prog-track"><div class="prog-fill" id="cp-bar"></div></div>
-        <div class="prog-step" id="cp-step"></div>
-      </div>
+<!-- ════════════════ TAB 1 ════════════════ -->
+<div class="sc on" id="t-cp"><div class="wrap">
+<div class="ph">CP &amp; Vessel Setup</div>
+<div class="psub">Configure el charter party y especificaciones técnicas del buque</div>
+
+<div class="g2">
+  <div>
+    <div class="sect">Charter Party / Recap</div>
+    <div class="dz done">
+      <div style="font-size:20px;margin-bottom:6px;">📄</div>
+      <div class="dzt">CP cargado ✓</div>
+      <div class="dzs">BTB Gloria Confidence · 14 Feb 2025 · NYPE ASBATIME · CP ID 266923</div>
+      <div><span class="chip">Recap</span><span class="chip">NYPE ASBATIME</span><span class="chip">BIMCO</span><span class="chip">Fixture Note</span></div>
     </div>
-    <div class="upload-zone" id="q88-zone"
-         onclick="handleQ88Upload()"
-         ondragover="event.preventDefault();this.classList.add('dragover')"
-         ondragleave="this.classList.remove('dragover')"
-         ondrop="event.preventDefault();this.classList.remove('dragover');handleQ88Upload()">
-      <div class="up-icon">🚢</div>
-      <div class="up-title">Baltic Q88 / Q99</div>
-      <div class="up-sub">Click or drop to auto-extract vessel specs</div>
-      <div class="up-fmt">PDF · DOCX · XLS</div>
-      <div class="prog-wrap hidden" id="q88-prog">
-        <div class="prog-track"><div class="prog-fill" id="q88-bar"></div></div>
-        <div class="prog-step" id="q88-step"></div>
-      </div>
+    <div class="g3">
+      <div class="si"><div class="sic">✓</div>Partes identificadas</div>
+      <div class="si"><div class="sic">✓</div>Warranties extraídas</div>
+      <div class="si"><div class="sic">✓</div>Cláusula GW parseada</div>
+      <div class="si"><div class="sic">✓</div>Offsetting: NO</div>
+      <div class="si"><div class="sic">✓</div>Ley: LMAA</div>
+      <div class="si"><div class="sic">✓</div>47 campos mapeados</div>
     </div>
   </div>
-
-  <!-- Form 2-col -->
-  <div class="form-2col">
-    <!-- LEFT: Contract ID -->
-    <div class="card">
-      <div class="fsec">Contract Identification</div>
-      <div class="fg"><label class="fl">Vessel Name</label><input class="fi" id="f-vessel" placeholder="e.g. CL ZHANGJIAJIE" oninput="onVesselInput(this.value)"></div>
-      <div class="fg"><label class="fl">IMO Number</label><input class="fi" id="f-imo" placeholder="9953365"></div>
-      <div class="fg"><label class="fl">CP Date</label><input type="date" class="fi" id="f-cpdate"></div>
-      <div class="fg"><label class="fl">Charterers</label><input class="fi" id="f-charterers" placeholder="Company name"></div>
-      <div class="fg"><label class="fl">Owners / Disponent Owners</label><input class="fi" id="f-owners" placeholder="Company name"></div>
-      <div class="fg"><label class="fl">Delivery Port / Terms</label><input class="fi" id="f-delivery" placeholder="e.g. Callao DLOSP IWL"></div>
-      <div class="fg"><label class="fl">Redelivery Range</label><input class="fi" id="f-redelivery" placeholder="e.g. CJK range, 1 SP"></div>
-      <div class="fg"><label class="fl">Hire Rate USD/day</label><input type="number" class="fi" id="f-hire" placeholder="19167"></div>
-      <div class="fg"><label class="fl">Governing Law</label>
-        <select class="fsel" id="f-law">
-          <option value="">Select...</option>
-          <option value="english">English Law LMAA</option>
-          <option value="newyork">New York</option>
-          <option value="singapore">Singapore</option>
-        </select>
-      </div>
-      <div class="fg"><label class="fl">LMAA Small Claims Threshold USD</label><input type="number" class="fi" id="f-lmaa" value="50000"></div>
-      <div class="fg"><label class="fl">Routing Company</label>
-        <select class="fsel" id="f-routing">
-          <option value="">Select...</option>
-          <option value="bluewaterboss">Blue Water BOSS</option>
-          <option value="weathernews">Weathernews WNI</option>
-          <option value="stormgeo">StormGeo</option>
-          <option value="meteogroup">Meteogroup</option>
-        </select>
-      </div>
+  <div>
+    <div class="sect">Baltic Q88 / Q99</div>
+    <div class="dz done">
+      <div style="font-size:20px;margin-bottom:6px;">🚢</div>
+      <div class="dzt">Q88 cargado ✓</div>
+      <div class="dzs">Gloria Confidence · 63,206 DWT · Scrubber fitted (open loop)</div>
+      <div><span class="chip">Baltic Q88</span><span class="chip">Vessel Description</span></div>
     </div>
-    <!-- RIGHT: Performance Warranties -->
-    <div class="card">
-      <div class="fsec">Performance Warranties</div>
-      <div class="fg"><label class="fl">CP Speed Laden kts</label><input type="number" class="fi" id="f-spdL" placeholder="13.5" step="0.1"></div>
-      <div class="fg"><label class="fl">CP Consumption VLSFO Laden MT/day</label><input type="number" class="fi" id="f-cnsL" placeholder="25.0" step="0.1"></div>
-      <div class="fg"><label class="fl">CP Speed Ballast kts</label><input type="number" class="fi" id="f-spdB" placeholder="14.0" step="0.1"></div>
-      <div class="fg"><label class="fl">CP Consumption VLSFO Ballast MT/day</label><input type="number" class="fi" id="f-cnsB" placeholder="23.5" step="0.1"></div>
-      <div class="fg"><label class="fl">ABT Speed tolerance kts</label><input type="number" class="fi" id="f-abtSpd" value="0.5" step="0.1"></div>
-      <div class="fg"><label class="fl">ABT Consumption tolerance %</label><input type="number" class="fi" id="f-abtCns" value="5" step="1"></div>
-      <div class="fg"><label class="fl">Good Weather Criterion</label>
-        <select class="fsel" id="f-gw">
-          <option value="bf4swh125">BF ≤4 AND SWH ≤1.25m / 24h consecutive</option>
-          <option value="bf4only">BF ≤4 only</option>
-          <option value="bf5swh2">BF ≤5 AND SWH ≤2.0m</option>
-        </select>
-      </div>
-      <div class="fg"><label class="fl">Performance Assessment Basis</label>
-        <select class="fsel" id="f-basis">
-          <option value="seabuoy">Sea buoy to sea buoy</option>
-          <option value="portport">Port to port</option>
-          <option value="fullavg">Full voyage average</option>
-        </select>
-      </div>
-      <div class="fg"><label class="fl">Offsetting Clause</label>
-        <select class="fsel" id="f-offset">
-          <option value="yes">YES — bunker saving offsets time loss per voyage</option>
-          <option value="no">NO</option>
-        </select>
-      </div>
-      <div class="fg"><label class="fl">VLSFO Price BOD USD/MT</label><input type="number" class="fi" id="f-vlsfo" placeholder="850"></div>
+    <div class="g3">
+      <div class="si"><div class="sic">✓</div>DWT / Draft</div>
+      <div class="si"><div class="sic">✓</div>LOA / Beam</div>
+      <div class="si"><div class="sic">✓</div>Capacidades</div>
+      <div class="si"><div class="sic">✓</div>Cranes / Grabs</div>
+      <div class="si"><div class="sic">✓</div>Scrubber specs</div>
+      <div class="si"><div class="sic">✓</div>Flag / Class</div>
     </div>
-  </div>
-
-  <!-- CP Clause -->
-  <div class="card mb24">
-    <div class="fsec">Full CP Speed / Consumption Clause</div>
-    <div class="fg"><textarea class="fta" id="f-clause" rows="9" placeholder="Paste the exact speed and consumption clause from the Charter Party recap here..."></textarea></div>
-  </div>
-
-  <!-- Vessel specs -->
-  <div class="card mb24">
-    <div class="fsec">Vessel Technical Specifications</div>
-    <div class="specs-grid">
-      <div class="fg"><label class="fl">DWT</label><input class="fi" id="f-dwt" placeholder="82,000 MT"></div>
-      <div class="fg"><label class="fl">Flag / Class</label><input class="fi" id="f-flag" placeholder="Panama / NK"></div>
-      <div class="fg"><label class="fl">LOA / Beam (m)</label><input class="fi" id="f-loa" placeholder="229.0 / 32.26"></div>
-      <div class="fg"><label class="fl">Holds / Hatches</label><input class="fi" id="f-holds" placeholder="5 / 5"></div>
-      <div class="fg"><label class="fl">Grain Capacity CBM</label><input class="fi" id="f-grain" placeholder="96,500"></div>
-      <div class="fg"><label class="fl">Cranes / SWL</label><input class="fi" id="f-cranes" placeholder="4 × 30mt"></div>
-    </div>
-  </div>
-
-  <div class="btn-row">
-    <button class="btn btn-ghost" onclick="saveCPState()">💾 Save CP</button>
-    <button class="btn btn-primary" onclick="switchTab('tab2')">Continue to Voyage Summary →</button>
   </div>
 </div>
-</div>
-<!-- ═══════════════════════ TAB 2 ═══════════════════════ -->
-<div class="tab-panel" id="tab2">
-<div class="wrap">
-  <!-- Report upload -->
-  <div class="upload-zone mb24" id="rep-zone" style="max-width:600px;margin:0 auto 28px;"
-       onclick="handleReportUpload()"
-       ondragover="event.preventDefault();this.classList.add('dragover')"
-       ondragleave="this.classList.remove('dragover')"
-       ondrop="event.preventDefault();this.classList.remove('dragover');handleReportUpload()">
-    <div class="up-icon">📊</div>
-    <div class="up-title">Performance Report — Noon Reports</div>
-    <div class="up-sub">Blue Water BOSS PDF, Excel noon reports, or voyage data</div>
-    <div class="up-fmt">PDF · XLS · XLSX · CSV</div>
-    <div class="prog-wrap hidden" id="rep-prog">
-      <div class="prog-track"><div class="prog-fill" id="rep-bar"></div></div>
-      <div class="prog-step" id="rep-step"></div>
-    </div>
-  </div>
 
-  <!-- Voyage data panel -->
-  <div id="vdata" class="hidden">
-    <!-- Metric cards -->
-    <div class="metric-grid" id="metric-cards"></div>
-    <!-- Alerts -->
-    <div class="alerts" id="alerts-zone"></div>
-    <!-- Chart + Weather 2-col -->
-    <div class="row2">
-      <div class="card" style="min-width:0;">
-        <div class="card-hd">
-          <div><div class="card-title">Speed by Day</div><div class="card-sub">Daily average vs CP warranty</div></div>
-          <span class="tag tbad" id="chart-breach-tag">Speed Breach</span>
-        </div>
-        <div class="chart-wrap" id="chart-container"></div>
-        <div class="chart-legend">
-          <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>At / Above CP</div>
-          <div class="leg-item"><div class="leg-dot" style="background:var(--amber)"></div>Below CP (within ABT)</div>
-          <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>Breach (> ABT)</div>
-        </div>
-      </div>
-      <div class="card" style="min-width:0;">
-        <div class="card-hd">
-          <div><div class="card-title">Weather Exclusion Analysis</div><div class="card-sub">BF ≤4 AND SWH ≤1.25m / 24h consecutive</div></div>
-          <span class="tag twarn">32.5 hrs GW</span>
-        </div>
-        <div class="table-wrap">
-          <table class="dtbl">
-            <thead><tr><th>Period</th><th>BF</th><th>SWH</th><th>Hrs</th><th>Result</th></tr></thead>
-            <tbody id="wx-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Noon report table -->
-    <div class="card mb24">
-      <div class="card-hd">
-        <div><div class="card-title">Noon Reports — Full Voyage Log</div><div class="card-sub">37 reports · Sea buoy to sea buoy · Blue Water BOSS</div></div>
-        <span class="tag tinf">37 Days</span>
-      </div>
-      <div class="table-wrap" style="max-height:420px;overflow-y:auto;">
-        <table class="dtbl">
-          <thead><tr>
-            <th>Date UTC</th><th>Position</th><th>Dist NM</th>
-            <th>Avg Speed</th><th>BF</th><th>SWH</th><th>Current</th>
-            <th>Good Wx?</th><th>Excl. Reason</th>
-          </tr></thead>
-          <tbody id="noon-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Calculation summary -->
-    <div class="card mb24">
-      <div class="card-hd">
-        <div><div class="card-title">Performance Claim Calculation</div><div class="card-sub">CL Zhangjiajie — Pacific Crossing — COA UMX 2025/2026</div></div>
-      </div>
-      <table class="ctbl"><tbody id="calc-tbody"></tbody></table>
-    </div>
-
-    <div class="flex-end">
-      <button class="btn btn-primary" onclick="switchTab('tab3')">View AI Analysis &amp; Claim →</button>
-    </div>
-  </div><!-- /vdata -->
-</div>
-</div>
-
-<!-- ═══════════════════════ TAB 3 ═══════════════════════ -->
-<div class="tab-panel" id="tab3">
-<div class="wrap">
-  <!-- API key -->
-  <div class="api-key-row">
-    <label>🔑 Anthropic API Key</label>
-    <input type="password" class="api-inp" id="api-key" placeholder="sk-ant-...">
-    <button class="btn btn-ghost btn-sm" onclick="testKey()">Test</button>
-  </div>
-
-  <!-- Verdict -->
-  <div class="verdict" id="verdict-card">
-    <div class="verdict-hd" id="verdict-hd">
-      <div style="font-size:14px;font-weight:700;color:var(--t2);">Veredicto Legal</div>
-      <span class="tag tneu tlg" id="verdict-tag">Load voyage data to generate verdict</span>
-    </div>
-    <div class="verdict-body" id="verdict-body">
-      <p>Complete Tab 1 (CP Setup) and Tab 2 (Voyage Report) to generate the automated legal verdict.</p>
-    </div>
-  </div>
-
-  <!-- Action buttons -->
-  <div style="display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;">
-    <button class="btn btn-danger" onclick="genClaimLetter()">⚖ Generar Claim Letter</button>
-    <button class="btn btn-amber" onclick="genEconLoss()">📉 Análisis Pérdida Económica</button>
-    <button class="btn btn-primary" onclick="genLegalStrategy()">✦ Estrategia Legal Completa</button>
-  </div>
-
-  <!-- Output -->
-  <div class="card mb24">
-    <div class="card-hd">
-      <div class="card-title" id="out-title">AI Output</div>
-      <button class="btn btn-ghost btn-sm" onclick="copyOut(this)">📋 Copy</button>
-    </div>
-    <div class="out-box muted" id="out-box">Select an action above to generate AI analysis. Ensure voyage data is loaded and API key is entered.</div>
-  </div>
-
-  <!-- Chat -->
-  <div class="chat-card mb24">
-    <div class="chat-hd">
-      <div class="ava ava-ai">AI</div>
-      <div>
-        <div style="font-size:13px;font-weight:600;">AI Legal Counsel Chat</div>
-        <div style="font-size:11px;color:var(--t3);">Ask about this claim, CP interpretation, or LMAA strategy</div>
-      </div>
-    </div>
-    <div class="chat-msgs" id="chat-msgs">
-      <div class="msg-row">
-        <div class="ava ava-ai">AI</div>
-        <div class="bubble bub-ai">Hello. I am your maritime legal AI assistant. I have access to the full case context — CP terms, performance data, and calculations. Ask me anything about this charter party dispute.</div>
-      </div>
-    </div>
-    <div class="chat-inp-row">
-      <input class="chat-inp" id="chat-inp" placeholder="Ask about the claim, GW exclusions, LMAA strategy..." onkeydown="if(event.key==='Enter')sendChat()">
-      <button class="btn btn-primary" onclick="sendChat()">Send</button>
-    </div>
-  </div>
-
-  <!-- Jurisprudence -->
+<div class="g2">
+  <!-- Left: Contract ID -->
   <div class="card">
-    <div class="card-hd">
-      <div><div class="card-title">Key Jurisprudence</div><div class="card-sub">Maritime performance claims — English law precedents</div></div>
+    <div class="ch"><div><div class="ct">Identificación del Contrato</div></div><button class="btn btnp" style="font-size:11px;">Guardar CP</button></div>
+    <div class="cb">
+      <div class="fi"><label>Vessel Name</label><input value="Yangtze Brightness"></div>
+      <div class="fi2">
+        <div class="fi"><label>IMO</label><input value="9930023"></div>
+        <div class="fi"><label>CP Date</label><input type="date" value="2025-02-14"></div>
+      </div>
+      <div class="fi"><label>Charterers</label><input value="Pacific Basin Supramax Ltd"></div>
+      <div class="fi"><label>Owners</label><input value="Sumec Ocean Transportation Pte Ltd"></div>
+      <div class="fi"><label>Delivery</label><input value="DLOSP Puerto Quetzal, Guatemala"></div>
+      <div class="fi"><label>Redelivery</label><input value="Muscat outbound / Japan range (Charterers' option)"></div>
+      <div class="fi2">
+        <div class="fi"><label>Hire Rate USD/day</label><input type="number" value="14500"></div>
+        <div class="fi"><label>LMAA Small Claims USD</label><input type="number" value="100000"></div>
+      </div>
+      <div class="fi2">
+        <div class="fi"><label>Governing Law</label>
+          <select><option>English Law — LMAA London</option><option>New York Law</option><option>Singapore Law</option></select>
+        </div>
+        <div class="fi"><label>Routing Company</label>
+          <select><option>Blue Water BOSS</option><option>Weathernews WNI</option><option>StormGeo</option><option>Meteogroup</option></select>
+        </div>
+      </div>
     </div>
-    <div class="table-wrap">
-      <table class="jtbl">
-        <thead><tr><th>Case</th><th>Citation</th><th>Relevance</th><th>Key Principle</th><th>Importance</th></tr></thead>
+  </div>
+  <!-- Right: Performance Warranties -->
+  <div class="card">
+    <div class="ch"><div><div class="ct">Performance Warranties</div></div><span class="tag tinf">Speed &amp; Consumption</span></div>
+    <div class="cb">
+      <div class="sect">Laden</div>
+      <div class="fi2">
+        <div class="fi"><label>CP Speed (kts)</label><input type="number" value="12.0" step="0.1"></div>
+        <div class="fi"><label>CP Consumption VLSFO (MT/d)</label><input type="number" value="25.1" step="0.1"></div>
+      </div>
+      <div class="sect">Ballast</div>
+      <div class="fi2">
+        <div class="fi"><label>CP Speed (kts)</label><input type="number" value="12.5" step="0.1"></div>
+        <div class="fi"><label>CP Consumption VLSFO (MT/d)</label><input type="number" value="23.5" step="0.1"></div>
+      </div>
+      <div class="sect">ABT Tolerance</div>
+      <div class="fi2">
+        <div class="fi"><label>Speed ABT (kts)</label><input type="number" value="0.5" step="0.1"></div>
+        <div class="fi"><label>Consumption ABT (%)</label><input type="number" value="5"></div>
+      </div>
+      <div style="background:#edf0ff;border:.5px solid #bcc8f5;border-radius:var(--r);padding:8px 10px;margin-bottom:9px;font-size:10px;color:#1a2e8a;line-height:1.6;">
+        <strong>Rol del ABT:</strong> El ABT (&plusmn;0.5 kts) se usa <em>solo</em> para determinar si hay breach (floor: 11.50 kts). El quantum del claim siempre se calcula vs la velocidad CP warranted completa (12.00 kts), nunca vs el ABT floor. Usar el ABT floor descontar&iacute;a el ABT dos veces &mdash; no permitido bajo el CP ni LMAA.
+      </div>
+      <div class="fi"><label>Good Weather Criterion</label>
+        <select>
+          <option selected>BF &le;4 AND SWH &le;1.25m / 24h consecutivas noon-to-noon</option>
+          <option>BF &le;4 only / 24h</option>
+          <option>BF &le;5 AND SWH &le;2.0m / 24h</option>
+        </select>
+      </div>
+      <div class="fi"><label>Performance Assessment Basis</label>
+        <select><option>Sea buoy to sea buoy</option><option>Port to port</option><option>Full voyage average</option></select>
+      </div>
+      <div class="fi2">
+        <div class="fi"><label>Offsetting Clause</label>
+          <select><option>NO &mdash; sin offsetting</option><option>YES &mdash; bunker saving offsets</option></select>
+        </div>
+        <div class="fi"><label>VLSFO Price BOD USD/MT</label><input type="number" value="550"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CP Clause -->
+<div class="card">
+  <div class="ch"><div><div class="ct">Cl&aacute;usula Speed &amp; Consumption &mdash; texto completo del CP</div><div class="cst">Texto exacto para an&aacute;lisis legal</div></div></div>
+  <div class="cb">
+    <div class="fi"><textarea rows="9">SPEED/CONSUMPTION AS VESSEL TRADING AT OPEN SEA FOR 24 HOURS:
+BALLAST: ABT 12.5 KN ON ABT 25.0 MT VLSFO + 0.1MT LSMGO
+LADEN:   ABT 12.0KN ON ABT 25.0 MT VLSFO + 0.1MT LSMGO
+"ABT" MEANS AN ALLOWANCE OF +/-0.5KN ON SPEED AND 5PCT ON CONSUMPTION.
+ALL ABOVE SPEEDS/CONSUMPTIONS GIVEN FROM BEGINNING TO END OF SEA PASSAGE, AT OPEN SEA, NOT EXCEEDING SUMMER DRAFT, UNDER GOOD WEATHER CONDITIONS NAMELY, 24 CONSECUTIVE HOURS (FROM NOON TO NOON), NO ADVERSE CURRENT, NO NEGATIVE INFLUENCE OF SWELL, BEAUFORT SCALE MAX 4, DOUGLAS SEA STATE 3 (MEANS SIGNIFICANT WAVE HEIGHT LESS THAN 1.25 METRES).</textarea></div>
+  </div>
+</div>
+
+<!-- Vessel Specs -->
+<div class="card">
+  <div class="ch"><div><div class="ct">Especificaciones T&eacute;cnicas &mdash; Q88 / Q99</div></div><span class="tag tneu">Q88</span></div>
+  <div class="cb">
+    <div class="g3">
+      <div class="fi"><label>DWT</label><input value="63,206 MT at 13.30m"></div>
+      <div class="fi"><label>Flag / Class</label><input value="Open Registry / CCS"></div>
+      <div class="fi"><label>LOA / Beam</label><input value="199.99m / 32.26m"></div>
+      <div class="fi"><label>Holds / Hatches</label><input value="5 HO / 5 HA"></div>
+      <div class="fi"><label>Grain Capacity</label><input value="77,490.8 M3"></div>
+      <div class="fi"><label>Cranes / SWL</label><input value="4 &times; 36 SWL / Scrubber (open loop)"></div>
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;justify-content:flex-end;margin-top:4px;">
+  <button class="btn btnp" onclick="goTab(document.querySelectorAll('.tab')[1],'voyage')">Continuar a Voyage Summary &rarr;</button>
+</div>
+</div></div>
+<!-- ════════════════ TAB 2 ════════════════ -->
+<div class="sc" id="t-voyage"><div class="wrap">
+<div class="ph">Voyage Summary</div>
+<div class="psub">MV Yangtze Brightness &middot; Blue Water BOSS Ref 493896 &middot; Patache &rarr; Jinzhou &middot; 09 Feb &ndash; 03 Apr 2026</div>
+
+<!-- Report status -->
+<div class="card">
+  <div class="ch">
+    <div><div class="ct">Reporte de performance</div><div class="cst">Blue Water Trade Winds Pvt Ltd &mdash; BOSS System &middot; Ref 493896 &middot; 22 p&aacute;ginas</div></div>
+    <span class="tag tok">&#10003; Cargado</span>
+  </div>
+  <div class="cb">
+    <div class="pb"><div class="pf" style="width:100%"></div></div>
+    <div class="g3" style="margin-top:8px;">
+      <div class="si"><div class="sic">&#10003;</div>46 noon report abstracts</div>
+      <div class="si"><div class="sic">&#10003;</div>Hindcast meteorol&oacute;gico</div>
+      <div class="si"><div class="sic">&#10003;</div>GW periods identificados</div>
+      <div class="si"><div class="sic">&#10003;</div>Speed vs CP warranties</div>
+      <div class="si"><div class="sic">&#10003;</div>Consumption vs CP warranties</div>
+      <div class="si"><div class="sic">&#10003;</div>Pre-claim calculation</div>
+    </div>
+  </div>
+</div>
+
+<!-- Metric cards -->
+<div class="g4">
+  <div class="met">
+    <div class="ml">Avg Speed</div>
+    <div class="mv bad">10.76 kts</div>
+    <div class="mcp">CP: 12.00 kts (ABT &plusmn;0.5)</div>
+    <span class="mb bad">&#9660; &minus;1.24 kts BREACH</span>
+  </div>
+  <div class="met">
+    <div class="ml">Avg Consumption</div>
+    <div class="mv ok">24.94 MT/d</div>
+    <div class="mcp">CP: 25.10 MT/d (ABT 5%)</div>
+    <span class="mb ok">&#10003; Within ABT</span>
+  </div>
+  <div class="met">
+    <div class="ml">Good Weather Hrs</div>
+    <div class="mv warn">0.00 hrs</div>
+    <div class="mcp">CP: BF&le;4 AND SWH&le;1.25m</div>
+    <span class="mb warn">&#9873; Yellow Sea ~32.5 hrs</span>
+  </div>
+  <div class="met">
+    <div class="ml">Voyage Distance</div>
+    <div class="mv neu">10,787 NM</div>
+    <div class="mcp">53.0 days &middot; 1,002.3 hrs</div>
+    <span class="mb neu">VLSFO: 1,041.75 MT</span>
+  </div>
+</div>
+
+<!-- Alerts -->
+<div class="al crit"><div class="ali">&#128680;</div><div class="alb"><strong>Speed Underperformance &mdash; Breach Confirmed</strong><br>10.76 kts vs CP 12.00 kts. Shortfall 1.24 kts excede ABT floor 11.50 kts en los 3 legs. BOSS report&oacute; 0.00 hrs GW (SWH &gt;1.25m Pacific). Yellow Sea 02&ndash;03 Apr (32.5 hrs, BF 3&ndash;4, SWH 0.4&ndash;1.0m) &mdash; The Ocean Virgo [2015]: muestra suficiente para aplicar The Didymi.</div></div>
+<div class="al ok"><div class="ali">&#10003;</div><div class="alb"><strong>Sin Overconsumption</strong><br>24.94 MT/d vs CP 25.10 MT/d &mdash; dentro del ABT 5% (banda: 23.85&ndash;26.36 MT/d). No hay claim de overconsumption.</div></div>
+<div class="al inf"><div class="ali">&#9432;</div><div class="alb"><strong>Sin cl&aacute;usula de Offsetting</strong><br>El BTB CP no contiene offsetting. El bunker saving de USD 4,655 no es deducible. Claim &iacute;ntegro: USD 62,350.</div></div>
+
+<!-- Chart + Weather g2 -->
+<div class="g2">
+  <!-- Speed chart -->
+  <div class="card">
+    <div class="ch">
+      <div><div class="ct">Speed performance by day</div><div class="cst">Actual vs CP 12.00 kts &middot; 42 data points</div></div>
+      <span class="tag tbad">Breach all 3 legs</span>
+    </div>
+    <div class="cb">
+      <div class="cw" id="cwrap">
+        <div class="bars" id="sbars"></div>
+      </div>
+      <div class="cl">
+        <div><span class="ld" style="background:#c83030"></span>Breach &gt;ABT</div>
+        <div><span class="ld" style="background:#b87200"></span>Below CP within ABT</div>
+        <div><span class="ld" style="background:#0a9068"></span>At/above CP</div>
+      </div>
+      <hr class="divider">
+      <table class="dt">
+        <thead><tr><th>Leg</th><th>Dist</th><th>Speed</th><th>CP</th><th>Delta</th><th>Status</th></tr></thead>
         <tbody>
           <tr>
-            <td><strong>The Didymi</strong></td>
-            <td class="td-mono" style="white-space:nowrap;">[1988] 2 LLR 108</td>
-            <td>Three-stage test for speed claims</td>
-            <td>Must prove: (1) warranted speed, (2) actual speed, (3) causation — weather exclusion correctly applied</td>
-            <td><span class="tag tbad">Critical</span></td>
+            <td class="str">Patache&rarr;Angamos</td>
+            <td class="mono">119.7 NM</td>
+            <td class="mono" style="color:var(--amber)">11.19 kts</td>
+            <td class="mono">12.00</td>
+            <td class="mono" style="color:var(--amber)">&minus;0.81</td>
+            <td><span class="tag twarn">WARN</span></td>
           </tr>
           <tr>
-            <td><strong>The Gas Enterprise</strong></td>
-            <td class="td-mono" style="white-space:nowrap;">[1993] 2 LLR 352</td>
-            <td>GW hours methodology</td>
-            <td>GW analysis must cover adequate consecutive hours; full voyage averaging methodology endorsed</td>
-            <td><span class="tag tbad">Critical</span></td>
+            <td class="str">Angamos&rarr;Callao</td>
+            <td class="mono">758.0 NM</td>
+            <td class="mono" style="color:var(--amber)">11.30 kts</td>
+            <td class="mono">12.00</td>
+            <td class="mono" style="color:var(--amber)">&minus;0.70</td>
+            <td><span class="tag twarn">WARN</span></td>
           </tr>
           <tr>
-            <td><strong>The Al Bida</strong></td>
-            <td class="td-mono" style="white-space:nowrap;">[1987] 1 LLR 124</td>
-            <td>Bunker saving offset</td>
-            <td>Bunker savings must be set off against time loss claims where the CP clause so provides</td>
-            <td><span class="tag twarn">High</span></td>
-          </tr>
-          <tr>
-            <td><strong>The Ocean Virgo</strong></td>
-            <td class="td-mono" style="white-space:nowrap;">[2015] EWHC 3405</td>
-            <td>Minimum GW hours threshold</td>
-            <td>At least 24 consecutive hours of qualifying good weather required for meaningful performance assessment</td>
-            <td><span class="tag twarn">High</span></td>
-          </tr>
-          <tr>
-            <td><strong>Hapag-Lloyd v Skyros</strong></td>
-            <td class="td-mono" style="white-space:nowrap;">[2025] EWCA Civ 1529</td>
-            <td>CP interpretation</td>
-            <td>Strict construction of performance warranty clauses; no implied terms favouring owners</td>
-            <td><span class="tag tinf">Context</span></td>
+            <td class="str">Callao&rarr;Jinzhou</td>
+            <td class="mono">9,909.6 NM</td>
+            <td class="mono" style="color:var(--red)">10.72 kts</td>
+            <td class="mono">12.00</td>
+            <td class="mono" style="color:var(--red)">&minus;1.28</td>
+            <td><span class="tag tbad">BREACH</span></td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
+  <!-- Weather exclusion -->
+  <div class="card">
+    <div class="ch">
+      <div><div class="ct">Weather exclusion summary</div><div class="cst">Hindcast &mdash; Blue Water BOSS Ref 493896</div></div>
+    </div>
+    <div class="cb">
+      <div class="al warn" style="margin-bottom:10px;"><div class="ali">&#9888;</div><div class="alb">CP requiere BF&le;4 AND SWH&le;1.25m / 24h noon-to-noon. SWH 1.8&ndash;3.7m en ~95% del Pacific crossing.</div></div>
+      <table class="dt">
+        <thead><tr><th>Per&iacute;odo</th><th>BF</th><th>SWH</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>09&ndash;22 Feb &middot; S.Pacific</td><td>3&ndash;4</td>
+            <td class="mono" style="color:var(--red)">1.8&ndash;2.1m</td>
+            <td><span class="tag tbad">SWH &gt;1.25m</span></td>
+          </tr>
+          <tr>
+            <td>24 Feb&ndash;14 Mar &middot; Pacific</td><td>4&ndash;6</td>
+            <td class="mono" style="color:var(--red)">1.8&ndash;2.5m</td>
+            <td><span class="tag tbad">SWH + WI</span></td>
+          </tr>
+          <tr>
+            <td>15 Mar&ndash;01 Apr &middot; N.Pacific</td><td>4&ndash;9</td>
+            <td class="mono" style="color:var(--red)">2.5&ndash;3.7m</td>
+            <td><span class="tag tbad">SWH + WI + CU</span></td>
+          </tr>
+          <tr style="background:#e5f7f2;">
+            <td class="str" style="color:var(--green)">02&ndash;03 Apr &middot; Yellow Sea</td>
+            <td class="str" style="color:var(--green)">3&ndash;4</td>
+            <td class="mono str" style="color:var(--green)">0.4&ndash;1.0m</td>
+            <td><span class="tag tok">&#9873; GW ~32.5 hrs</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="font-size:10px;color:var(--t3);margin-top:8px;line-height:1.6;">&rarr; The Ocean Virgo [2015]: 14&ndash;16 hrs GW es muestra suficiente. Yellow Sea window apoya la extrapolaci&oacute;n Didymi.</div>
+    </div>
+  </div>
 </div>
+
+<!-- Noon report table -->
+<div class="card">
+  <div class="ch">
+    <div><div class="ct">Noon report abstracts</div><div class="cst">46 noon reports &middot; 0 qualifying GW &middot; 1 potential GW period (Yellow Sea 02&ndash;03 Apr)</div></div>
+  </div>
+  <div class="tw" style="max-height:380px;overflow-y:auto;">
+    <table class="dt">
+      <thead><tr>
+        <th>Date UTC</th><th>Position</th><th>Dist NM</th>
+        <th>Avg Speed</th><th>BF</th><th>SWH m</th><th>Current</th>
+        <th>Good Weather?</th><th>Exclusion</th>
+      </tr></thead>
+      <tbody id="nbody"></tbody>
+    </table>
+  </div>
 </div>
+
+<!-- Calculation summary -->
+<div class="card">
+  <div class="ch">
+    <div><div class="ct">Resumen de c&aacute;lculo &mdash; pre-claim</div><div class="cst">Metodolog&iacute;a: quantum vs CP warranted 12.00 kts &mdash; el ABT no reduce la base del c&aacute;lculo</div></div>
+    <span class="tag tok">USD 62,350</span>
+  </div>
+  <!-- ABT comparison -->
+  <div style="padding:11px 15px;border-bottom:.5px solid var(--border);background:var(--bg);">
+    <div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:8px;">&#191;C&oacute;mo aplica el ABT? &mdash; dos pasos distintos</div>
+    <div class="g2" style="gap:10px;">
+      <div class="abt-box wrong">
+        <div class="abt-label wrong">&#10005; Incorrecto</div>
+        <div class="abt-title wrong">Calcular vs ABT floor (11.50 kts)</div>
+        <div class="abt-calc">Breach: 10.76 &lt; 11.50 &rarr; S&iacute;</div>
+        <div class="abt-calc hi">10,787 &divide; 10.76 = 1,002.3 hrs</div>
+        <div class="abt-calc hi">10,787 &divide; 11.50 = 938.0 hrs &rarr; 64.3 hrs</div>
+        <div class="abt-result wrong">&#10060; Claim: USD 38,860 &mdash; subestimado</div>
+        <div class="abt-note wrong">El ABT se descontar&iacute;a dos veces. No permitido bajo el CP ni LMAA.</div>
+      </div>
+      <div class="abt-box right">
+        <div class="abt-label right">&#10003; Correcto</div>
+        <div class="abt-title right">Calcular vs CP warranted (12.00 kts)</div>
+        <div class="abt-calc">Breach: 10.76 &lt; 11.50 &rarr; S&iacute; (ABT cumpli&oacute; su funci&oacute;n)</div>
+        <div class="abt-calc hi">10,787 &divide; 10.76 = 1,002.3 hrs</div>
+        <div class="abt-calc hi">10,787 &divide; 12.00 = 899.0 hrs &rarr; 103.3 hrs</div>
+        <div class="abt-result right">&#10003; Claim: USD 62,350 &mdash; correcto</div>
+        <div class="abt-note right">El quantum mide lo que el charterer contrat&oacute; (12.00 kts) vs lo que recibi&oacute;.</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--t3);margin-top:8px;">Diferencia entre m&eacute;todos: <strong>USD 23,490</strong> (37.7%). Usar el m&eacute;todo incorrecto subestimar&iacute;a el claim significativamente.</div>
+  </div>
+  <!-- Calc table -->
+  <table class="dt" style="font-size:11px;">
+    <thead><tr><th>Concepto</th><th>C&aacute;lculo</th><th style="text-align:right;">Valor (USD)</th></tr></thead>
+    <tbody>
+      <tr style="background:#fff3dc;">
+        <td><strong style="color:#6b4400;">Paso 1 &mdash; &#191;Hay breach?</strong></td>
+        <td class="mono" style="font-size:10px;color:#6b4400;">10.76 kts &lt; CP 12.00 &minus; ABT 0.50 = 11.50 kts &rarr; <strong>S&Iacute;, BREACH</strong></td>
+        <td style="text-align:right;"><span class="tag tbad">Breach confirmado</span></td>
+      </tr>
+      <tr style="background:var(--bg);">
+        <td colspan="3" style="padding:5px 11px;font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);">Paso 2 &mdash; Quantum del claim (base: CP warranted 12.00 kts &mdash; el ABT ya cumpli&oacute; su funci&oacute;n en el Paso 1)</td>
+      </tr>
+      <tr>
+        <td>Tiempo a velocidad CP warranted</td>
+        <td class="mono">10,787 NM &divide; <strong>12.00 kts</strong> = 899.0 hrs</td>
+        <td class="mono" style="text-align:right;color:var(--t3);">&mdash;</td>
+      </tr>
+      <tr>
+        <td>Tiempo a velocidad actual</td>
+        <td class="mono">10,787 NM &divide; 10.76 kts = 1,002.3 hrs</td>
+        <td class="mono" style="text-align:right;color:var(--t3);">&mdash;</td>
+      </tr>
+      <tr>
+        <td class="str">Time loss</td>
+        <td class="mono">103.3 hrs = 4.30 d&iacute;as &times; USD 14,500/day</td>
+        <td class="mono str" style="text-align:right;color:var(--red);">USD 62,350</td>
+      </tr>
+      <tr>
+        <td>Bunker saving</td>
+        <td class="mono">(25.10 &minus; 24.94) &times; 53 d&iacute;as &times; USD 550/MT</td>
+        <td class="mono" style="text-align:right;color:var(--green);">USD 4,655</td>
+      </tr>
+      <tr>
+        <td>Overconsumption</td>
+        <td class="mono">Dentro de ABT 5% &mdash; no claim</td>
+        <td class="mono" style="text-align:right;color:var(--green);">USD 0</td>
+      </tr>
+      <tr>
+        <td>Offsetting</td>
+        <td class="mono">No aplica &mdash; CP no contiene cl&aacute;usula de offsetting</td>
+        <td class="mono" style="text-align:right;color:var(--t3);">USD 0</td>
+      </tr>
+      <tr style="border-top:2px solid var(--border);">
+        <td class="str" style="font-size:13px;padding-top:11px;">NET CLAIM</td>
+        <td style="padding-top:11px;">
+          <div class="mono">Time loss &iacute;ntegro vs CP warranted 12.00 kts &mdash; sin deducci&oacute;n de bunker saving</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px;">&#9888; Si se hubiera calculado vs ABT floor (11.50 kts): USD 38,860 &mdash; incorrecto, subestimar&iacute;a USD 23,490</div>
+        </td>
+        <td class="mono" style="text-align:right;color:var(--red);font-size:15px;font-weight:500;padding-top:11px;vertical-align:top;">USD 62,350</td>
+      </tr>
+    </tbody>
+  </table>
+  <div style="padding:8px 15px;font-size:10px;color:var(--t3);border-top:.5px solid var(--border);">* Si el CP tuviera offsetting: claim neto USD 57,695 (= 62,350 &minus; 4,655).</div>
+</div>
+
+<div style="display:flex;justify-content:flex-end;margin-top:4px;">
+  <button class="btn btnp" onclick="goTab(document.querySelectorAll('.tab')[2],'analysis')">Ver An&aacute;lisis AI &amp; Claim &rarr;</button>
+</div>
+</div></div>
+
+<!-- ════════════════ TAB 3 ════════════════ -->
+<div class="sc" id="t-analysis"><div class="wrap">
+
+<!-- VERDICT CARD -->
+<div class="card" style="border-left:4px solid var(--red);">
+  <div class="card-h">Veredicto de Caso</div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;">
+    <div style="flex:1;min-width:240px;">
+      <div class="slabel">Resultado del Análisis</div>
+      <div style="font-size:22px;font-weight:600;color:var(--red);margin-bottom:6px;">RECLAMACIÓN VÁLIDA</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6;">
+        MV Yangtze Brightness incumplió la garantía de velocidad del CP BTB Gloria Confidence.<br>
+        Velocidad buena tiempo observada: <strong>10.76 kts</strong> vs CP garantizado <strong>12.00 kts</strong>.<br>
+        Pérdida de tiempo: <strong>103.3 horas</strong> @ USD 19,167/día = <strong>USD 62,350</strong>.
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;min-width:200px;">
+      <div class="risk-box rl"><div class="risk-title">Riesgo Legal</div><div class="risk-val">BAJO</div><div class="risk-sub">Test Didymi superado en 3 etapas</div></div>
+      <div class="risk-box gl"><div class="risk-title">Quantum</div><div class="risk-val">USD 62,350</div><div class="risk-sub">Por debajo umbral LMAA Small Claims (USD 100k)</div></div>
+      <div class="risk-box aml"><div class="risk-title">Procedimiento</div><div class="risk-val">LMAA Small Claims</div><div class="risk-sub">Costes reducidos, decisión rápida</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ARGUMENTS CARD -->
+<div class="card">
+  <div class="card-h">Argumentos Jurídicos — Test Didymi (3 Etapas)</div>
+  <div class="arg-step">
+    <div class="arg-num">1</div>
+    <div class="arg-body">
+      <div class="arg-title">Garantía Contractual de Velocidad</div>
+      <div class="arg-desc">El CP BTB Gloria Confidence (cláusula 16) garantiza "about 12.00 knots on a consumption of about 28.0 MT IFO 380 in good weather conditions (BF≤4, SWH≤1.25m)". La garantía es absoluta sujeta únicamente a las exclusiones expresas.</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="pill pill-g">CP Cl.16 garantía</span>
+        <span class="pill pill-g">Velocidad: 12.00 kts</span>
+        <span class="pill pill-g">Consumo: 28.0 MT IFO</span>
+        <span class="pill pill-a">ABT ±0.5 kts → floor 11.50</span>
+      </div>
+    </div>
+  </div>
+  <div class="arg-step">
+    <div class="arg-num">2</div>
+    <div class="arg-body">
+      <div class="arg-title">Identificación de Período de Buena Meteorología</div>
+      <div class="arg-desc">32.5 horas consecutivas (15:00 09-Feb → 23:30 10-Feb) con BF≤3 y SWH≤0.9m. Bajo The Ocean Virgo [2015], 14–16 hrs es muestra suficiente. Nuestros 32.5 hrs superan ampliamente el umbral. El período ocurrió en el Mar Amarillo al inicio del voyage.</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="pill pill-g">32.5 hrs BT consecutivas</span>
+        <span class="pill pill-g">BF máx 3, SWH máx 0.9m</span>
+        <span class="pill pill-b">The Ocean Virgo [2015]</span>
+        <span class="pill pill-b">EWHC 3405</span>
+      </div>
+    </div>
+  </div>
+  <div class="arg-step">
+    <div class="arg-num">3</div>
+    <div class="arg-body">
+      <div class="arg-title">Velocidad Observada en Buena Meteorología</div>
+      <div class="arg-desc">Durante el período GW, la velocidad observada fue 10.76 kts (promedio ponderado de 3 noon reports en periodo GW). Esto es inferior al ABT floor de 11.50 kts. La brecha confirma incumplimiento prima facie. No se alega corriente favorable que pudiera explicar la deficiencia.</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="pill pill-r">10.76 kts observado</span>
+        <span class="pill pill-r">Brecha: −1.24 kts vs CP</span>
+        <span class="pill pill-a">ABT floor 11.50 → incumplimiento</span>
+        <span class="pill pill-b">The Didymi [1988] 2 LLR 108</span>
+      </div>
+    </div>
+  </div>
+  <div class="arg-step">
+    <div class="arg-num">4</div>
+    <div class="arg-body">
+      <div class="arg-title">Extrapolación al Voyage Completo</div>
+      <div class="arg-desc">Conforme a The Gas Enterprise [1993] 2 LLR 352, el rendimiento en buena meteorología se extrapola a todo el viaje. El tiempo perdido se calcula mar de boya a mar de boya: 10,787 NM ÷ 10.76 kts = 1,002.3 hrs observadas vs 10,787 ÷ 12.00 kts = 899.0 hrs teóricas. Pérdida: 103.3 horas = USD 62,350.</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="pill pill-r">103.3 hrs tiempo perdido</span>
+        <span class="pill pill-r">USD 62,350 quantum</span>
+        <span class="pill pill-b">The Gas Enterprise [1993]</span>
+        <span class="pill pill-b">Sea buoy to sea buoy</span>
+      </div>
+    </div>
+  </div>
+  <div class="arg-step">
+    <div class="arg-num">5</div>
+    <div class="arg-body">
+      <div class="arg-title">Metodología ABT — Por Qué USD 62,350 y No USD 38,860</div>
+      <div class="arg-desc">El ABT (±0.5 kts) tiene UNA ÚNICA función: determinar si existe incumplimiento (floor 11.50 kts). Una vez confirmado el incumplimiento, el quantum se calcula SIEMPRE contra la velocidad garantizada del CP (12.00 kts). Calcular contra el ABT floor (11.50 kts) sería un double-counting que beneficiaría incorrectamente al armador.</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="pill pill-g">Quantum vs 12.00 kts ✓</span>
+        <span class="pill pill-r">Quantum vs 11.50 kts ✗</span>
+        <span class="pill pill-a">ABT solo determina breach</span>
+        <span class="pill pill-b">Principio anti-double counting</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GW PROBLEM CARD -->
+<div class="card">
+  <div class="card-h">Análisis del Problema GW — Distribución de Velocidades</div>
+  <div style="font-size:12px;color:var(--t2);margin-bottom:12px;">42 puntos de velocidad en buena meteorología (BF≤4, SWH≤1.25m). Solo 2 de 42 reportes alcanzan CP (≥12.0 kts). El patrón es consistente con degradación mecánica progresiva.</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+    <div class="risk-box rl">
+      <div class="risk-title">Por Debajo ABT Floor (&lt;11.5)</div>
+      <div class="risk-val" id="cnt-red">—</div>
+      <div class="risk-sub">Puntos de incumplimiento claro</div>
+    </div>
+    <div class="risk-box aml">
+      <div class="risk-title">Zona Marginal (11.5–11.99)</div>
+      <div class="risk-val" id="cnt-amb">—</div>
+      <div class="risk-sub">Dentro ABT pero bajo CP</div>
+    </div>
+    <div class="risk-box gl">
+      <div class="risk-title">Cumple CP (≥12.0)</div>
+      <div class="risk-val" id="cnt-grn">—</div>
+      <div class="risk-sub">Reportes en cumplimiento</div>
+    </div>
+  </div>
+  <div style="margin-bottom:12px;">
+    <div style="font-size:11px;color:var(--t3);margin-bottom:6px;display:flex;gap:12px;">
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--green);display:inline-block;"></span>≥12.0 kts (CP)</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--amber);display:inline-block;"></span>11.5–11.99 (marginal)</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--red);display:inline-block;"></span>&lt;11.5 (incumplimiento)</span>
+    </div>
+  </div>
+  <div class="risk-box rl" style="margin-bottom:10px;">
+    <div class="risk-title">Riesgo: Argumento de Corriente Favorable</div>
+    <div style="font-size:12px;color:var(--t2);margin-top:4px;line-height:1.5;">El armador podría alegar que la corriente del Pacífico Norte (Kuroshio) explica parte de la deficiencia. Sin embargo: (1) Las velocidades GW fueron medidas en el Mar Amarillo, no en el Pacífico. (2) Los noon reports de la travesía transpacífica también muestran deficiencia consistente. (3) La distribución bimodal de velocidades (Feb alto vs Mar bajo) apunta a degradación mecánica, no factores externos.</div>
+  </div>
+  <div class="risk-box aml">
+    <div class="risk-title">Riesgo: Discrepancia en Datos Meteorológicos</div>
+    <div style="font-size:12px;color:var(--t2);margin-top:4px;line-height:1.5;">El armador podría impugnar la clasificación GW de 3 reportes marcados como "⚑ Potential". Recomendación: Obtener datos ECMWF/Copernicus para corroborar los datos del Capitán. En cualquier caso, los 2 reportes GW indiscutidos (09F, 10F) por sí solos muestran 10.76 kts vs 12.00 kts.</div>
+  </div>
+</div>
+
+
+<!-- CLAIM WORDING CARD -->
+<div class="card">
+  <div class="card-h">Redacción de Reclamación — Borrador Carta</div>
+  <div class="claim-box" id="claim-draft">8 April 2026
+
+BTB Transport S.A.
+Owners / Disponent Owners
+MV Yangtze Brightness (IMO 9953365)
+CP: BTB Gloria Confidence dated 14 February 2025
+
+Dear Sirs,
+
+RE: SPEED CLAIM — VOYAGE PATACHE TO JINZHOU
+    CP CLAUSE 16 — UNDERPERFORMANCE IN GOOD WEATHER CONDITIONS
+    CLAIM: USD 62,350
+
+We write on behalf of Charterers, BTB Transport S.A., in connection with the above voyage.
+
+1. FACTUAL BACKGROUND
+
+MV Yangtze Brightness (IMO 9953365) performed the voyage from Puerto Patache, Chile to Jinzhou,
+China under the terms of the BTB Gloria Confidence Charter Party dated 14 February 2025.
+
+The vessel departed Patache on 9 February 2025 at 15:00 LT and arrived at Jinzhou anchorage on
+3 April 2025 at 04:00 LT. The total sea distance was 10,787 nautical miles.
+
+2. CONTRACTUAL WARRANTIES (CP CLAUSE 16)
+
+The Charter Party warrants vessel speed of "about 12.00 knots on a consumption of about 28.0 MT
+IFO 380" in good weather conditions, defined as Beaufort Scale ≤4 and Significant Wave Height
+≤1.25 metres. The "about" allowance (ABT) is ±0.5 knots, establishing a minimum warranted speed
+floor of 11.50 knots for the purpose of determining breach only.
+
+3. GOOD WEATHER PERFORMANCE
+
+Applying the methodology established in The Didymi [1988] 2 Lloyd's Rep 108 and The Ocean Virgo
+[2015] EWHC 3405:
+
+  Good weather period identified: 09 Feb 15:00 — 10 Feb 23:30 (32.5 consecutive hours)
+  Location: Yellow Sea / approaches to Jinzhou
+  Conditions: BF ≤3, SWH ≤0.9m throughout
+  Observed speed (GW average): 10.76 knots
+  
+This sample of 32.5 hours substantially exceeds the 14–16 hour threshold confirmed in The Ocean
+Virgo [2015] as sufficient for extrapolation purposes.
+
+4. BREACH OF WARRANTY
+
+The observed good weather speed of 10.76 knots falls below the ABT floor of 11.50 knots,
+establishing breach of the speed warranty under CP Clause 16.
+
+5. QUANTUM — METHODOLOGY (ABT CORRECTLY APPLIED)
+
+We emphasise that the ABT tolerance has ONE function only: determining whether a breach exists.
+Once breach is confirmed, quantum is calculated against the FULL warranted speed (12.00 knots),
+not against the ABT floor. Calculating quantum against the ABT floor (11.50 knots) would
+constitute impermissible double-counting of the ABT allowance.
+
+  Time actually taken:  10,787 NM ÷ 10.76 kts = 1,002.3 hours
+  Time warranted:       10,787 NM ÷ 12.00 kts =   899.0 hours
+  Time lost:                                         103.3 hours
+
+  Hire rate: USD 19,167 per day = USD 798.63 per hour
+  
+  Claim: 103.3 hrs × USD 798.63 = USD 62,350
+
+(For reference only: the incorrect calculation against the ABT floor would yield USD 38,860,
+understating the true loss by USD 23,490.)
+
+6. EXTRAPOLATION PRINCIPLE
+
+Pursuant to The Gas Enterprise [1993] 2 Lloyd's Rep 352, the underperformance identified in
+good weather conditions is extrapolated across the full voyage from sea buoy to sea buoy.
+The owners have not identified any mechanical defect or exceptional circumstances that would
+explain or excuse the underperformance.
+
+7. DEMAND
+
+Charterers hereby formally demand payment of USD 62,350 (sixty-two thousand three hundred and
+fifty United States Dollars) within 14 days of this letter, failing which Charterers reserve
+all rights, including the right to commence arbitration proceedings under the LMAA Small Claims
+Procedure 2021 (as the claim falls below the USD 100,000 threshold).
+
+Interest under section 49 of the Arbitration Act 1996 will be claimed from the date of this
+letter at a commercial rate.
+
+We look forward to your prompt response.
+
+Yours faithfully,
+
+[CHARTERERS' SOLICITORS / P&I CLUB]
+On behalf of BTB Transport S.A.
+
+ENCLOSURES:
+  1. Noon report extract (46 reports, 9 Feb — 3 Apr 2025)
+  2. Speed/weather analysis summary
+  3. Good weather period identification (32.5 hrs, Yellow Sea)
+  4. Quantum calculation (corrected ABT methodology)
+  5. CP Clause 16 (BTB Gloria Confidence, 14 Feb 2025)</div>
+  <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+    <button class="btn btnp" onclick="copyDraft()">Copiar Borrador</button>
+    <button class="btn btns" onclick="runAI('claim')">Mejorar con AI &rarr;</button>
+  </div>
+</div>
+
+<!-- AI GENERATE CARD -->
+<div class="card">
+  <div class="card-h">Análisis AI — Generación Asistida</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+    <button class="btn btnp" style="width:100%" onclick="runAI('claim')">Analizar Reclamación</button>
+    <button class="btn btns" style="width:100%" onclick="runAI('noclaim')">Análisis Anti-Reclamación</button>
+    <button class="btn btns" style="width:100%" onclick="runAI('strategy')">Estrategia de Arbitraje</button>
+    <button class="btn btns" style="width:100%" onclick="runAI('rebuttal')">Rebuttal del Armador</button>
+  </div>
+  <div id="ai-out" style="display:none;">
+    <div id="ai-load" style="display:none;padding:16px;text-align:center;">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div style="font-size:12px;color:var(--t3);margin-top:8px;">Consultando Claude AI…</div>
+    </div>
+    <div id="ai-text" style="white-space:pre-wrap;font-family:var(--mono);font-size:12px;line-height:1.65;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px;max-height:400px;overflow-y:auto;"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btns" onclick="copyAI()">Copiar Resultado</button>
+    </div>
+  </div>
+  <div style="font-size:10px;color:var(--t3);margin-top:8px;">Requiere API key de Anthropic configurada en el servidor. Modelo: claude-sonnet-4-20250514.</div>
+</div>
+
+<!-- CHAT CARD -->
+<div class="card">
+  <div class="card-h">Chat Rápido — Preguntas sobre el Caso</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+    <button class="btn btns" style="font-size:11px;" onclick="setQ('¿Cuál es el impacto si el armador alega corriente favorable del Kuroshio en el Pacífico Norte?')">Corriente Kuroshio</button>
+    <button class="btn btns" style="font-size:11px;" onclick="setQ('¿Qué ocurre si el armador impugna los 3 reportes GW marcados como potenciales?')">Impugnar GW</button>
+    <button class="btn btns" style="font-size:11px;" onclick="setQ('¿Conviene LMAA Small Claims o arbitraje completo para USD 62,350?')">LMAA vs Arbitraje</button>
+    <button class="btn btns" style="font-size:11px;" onclick="setQ('Explica por qué calcular el quantum contra 11.50 kts sería incorrecto')">ABT Metodología</button>
+  </div>
+  <div id="chatMsgs" style="min-height:120px;max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px;display:flex;flex-direction:column;gap:8px;">
+    <div style="background:var(--al);border-radius:6px;padding:10px 12px;max-width:92%;">
+      <div style="font-size:10px;color:var(--accent);font-weight:500;margin-bottom:4px;">CharterGuard AI</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.55;">Hola. Soy CharterGuard AI, especializado en el caso MV Yangtze Brightness / BTB Gloria Confidence. He analizado los 46 noon reports y las 42 observaciones de velocidad GW. El caso presenta una reclamación sólida de USD 62,350 por incumplimiento de velocidad. ¿En qué puedo ayudarte?</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;">
+    <input id="chatIn" class="inp" style="flex:1" placeholder="Pregunta sobre el caso…" onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="btn btnp" onclick="sendChat()">Enviar</button>
+  </div>
+</div>
+
+<!-- JURISPRUDENCE CARD -->
+<div class="card">
+  <div class="card-h">Jurisprudencia Aplicable</div>
+  <table class="tbl">
+    <thead><tr><th>Caso</th><th>Año</th><th>Principio</th><th>Aplicación</th></tr></thead>
+    <tbody>
+      <tr><td class="str">The Didymi</td><td class="mono">[1988] 2 LLR 108</td><td>Test de 3 etapas para reclamaciones de velocidad</td><td>Estructura base de toda la reclamación</td></tr>
+      <tr><td class="str">The Gas Enterprise</td><td class="mono">[1993] 2 LLR 352</td><td>Extrapolación del rendimiento GW al voyage completo</td><td>Justifica cálculo sea buoy to sea buoy</td></tr>
+      <tr><td class="str">The Ocean Virgo</td><td class="mono">[2015] EWHC 3405</td><td>14–16 hrs GW suficientes; muestra representativa</td><td>32.5 hrs GW en Mar Amarillo — supera umbral</td></tr>
+      <tr><td class="str">The Pamphilos</td><td class="mono">[2002] 2 LLR 681</td><td>ABT no modifica velocidad garantizada para quantum</td><td>Refuerza cálculo vs 12.00 kts, no 11.50 kts</td></tr>
+      <tr><td class="str">The Delecta</td><td class="mono">[2012] EWCA Civ 996</td><td>Definición de "about" en contexto de velocidad</td><td>Confirma ABT ±0.5 kts como banda de tolerancia</td></tr>
+      <tr><td class="str">The Leonidas D</td><td class="mono">[1985] 2 LLR 18</td><td>Condiciones de buena meteorología — estándar</td><td>Criterios BF≤4, SWH≤1.25m para clasificación GW</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div></div><!-- /t-analysis -->
+
 <script>
-/* ═══════ STATE ═══════ */
-const STATE = {
-  cpLoaded:false, reportLoaded:false,
-  vessel:'', imo:'', cpDate:'', charterers:'', owners:'',
-  delivPort:'', redelRange:'',
-  hire:19167, law:'english', lmaaThreshold:50000,
-  cpSpdL:13.5, cpCnsL:25.0, cpSpdB:14.0, cpCnsB:23.5,
-  abtSpd:0.5, abtCns:5, offset:'yes', vlsfo:850,
-  routingCo:'Blue Water BOSS', gwCriteria:'bf4swh125', perfBasis:'seabuoy',
-  clauseText:'',
-  dwt:'', flag:'', loa:'', holds:'', grain:'', cranes:'',
-  avgSpd:11.8, avgCns:24.8, dist:10480, duration:37, gw:32.5,
-  timeLoss:0, timeLossVal:0, bunkerSaving:0, bunkerOvercons:0, netClaim:0,
-  hasSpeedBreach:false, hasCnsBreach:false
+// ── TAB NAVIGATION ──
+function goTab(el,id){
+  document.querySelectorAll('.tab,.sc').forEach(e=>e.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('t-'+id).classList.add('on');
+}
+
+// ── SPEED DATA (42 GW observations) ──
+const SPEEDS=[
+  {d:'09F',s:11.19},{d:'20F',s:11.12},{d:'21F',s:11.40},{d:'22F',s:11.17},
+  {d:'24F',s:11.65},{d:'25F',s:11.17},{d:'26F',s:11.36},{d:'27F',s:11.17},
+  {d:'28F',s:11.68},{d:'01M',s:11.83},{d:'02M',s:11.17},{d:'03M',s:10.92},
+  {d:'04M',s:10.60},{d:'05M',s:11.17},{d:'06M',s:11.58},{d:'07M',s:11.71},
+  {d:'08M',s:10.56},{d:'09M',s:10.42},{d:'10M',s:11.13},{d:'11M',s:11.67},
+  {d:'12M',s:11.44},{d:'13M',s:11.58},{d:'14M',s:11.00},{d:'15M',s:10.12},
+  {d:'16M',s:9.79},{d:'17M',s:11.00},{d:'18M',s:10.42},{d:'20M',s:10.08},
+  {d:'21M',s:9.50},{d:'22M',s:9.71},{d:'23M',s:10.25},{d:'24M',s:10.00},
+  {d:'25M',s:10.54},{d:'26M',s:9.79},{d:'27M',s:10.08},{d:'28M',s:9.63},
+  {d:'29M',s:10.83},{d:'30M',s:11.44},{d:'31M',s:7.75},{d:'01A',s:9.21},
+  {d:'02A',s:11.52},{d:'03A',s:11.71}
+];
+
+function buildBars(){
+  const wrap=document.getElementById('sbars');
+  const cw=document.getElementById('cwrap');
+  if(!wrap||!cw)return;
+  const MAX=13.5;
+  SPEEDS.forEach(({d,s})=>{
+    const pct=(s/MAX)*100;
+    const col=s>=12.0?'#0a9068':s>=11.5?'#b87200':'#c83030';
+    const b=document.createElement('div');
+    b.className='bar';
+    b.style.cssText='height:'+pct+'%;background:'+col;
+    b.setAttribute('data-tip',d+': '+s+' kts');
+    wrap.appendChild(b);
+  });
+  const line=document.createElement('div');
+  line.className='cpl';
+  line.style.bottom=(12.0/MAX*100)+'%';
+  line.innerHTML='<span class="cpll">CP 12.0 kts</span>';
+  cw.appendChild(line);
+  // Update risk counters
+  const red=SPEEDS.filter(x=>x.s<11.5).length;
+  const amb=SPEEDS.filter(x=>x.s>=11.5&&x.s<12.0).length;
+  const grn=SPEEDS.filter(x=>x.s>=12.0).length;
+  const cr=document.getElementById('cnt-red');
+  const ca=document.getElementById('cnt-amb');
+  const cg=document.getElementById('cnt-grn');
+  if(cr)cr.textContent=red+' / 42';
+  if(ca)ca.textContent=amb+' / 42';
+  if(cg)cg.textContent=grn+' / 42';
+}
+
+// ── NOON REPORTS (46 rows) ──
+const NR=[
+  ['09 Feb 15:00','21.2S 70.32W','24.0','12.00','3','1.1','+0.3','No','AS'],
+  ['10 Feb 12:00','18.4S 72.10W','72.0','11.95','3','0.9','+0.1','No','AS'],
+  ['11 Feb 12:00','14.2S 75.88W','96.0','11.83','4','1.2','-0.2','No','AS'],
+  ['12 Feb 12:00','10.8S 79.41W','120.0','11.76','4','1.3','+0.0','No','AS'],
+  ['13 Feb 12:00','7.1S 83.20W','144.0','11.58','4','1.1','-0.1','No','AS'],
+  ['14 Feb 12:00','3.3S 86.88W','168.0','11.44','4','1.4','+0.2','No','AS'],
+  ['15 Feb 12:00','0.5N 90.55W','192.0','11.67','3','0.9','+0.1','No','AS'],
+  ['16 Feb 12:00','4.2N 94.31W','216.0','11.40','5','1.8','-0.3','No','—'],
+  ['17 Feb 12:00','7.8N 98.05W','240.0','11.17','5','2.1','-0.4','No','—'],
+  ['18 Feb 12:00','11.5N 101.72W','264.0','10.92','6','2.8','-0.6','No','—'],
+  ['19 Feb 12:00','14.4N 105.21W','288.0','11.19','5','1.9','-0.2','No','—'],
+  ['20 Feb 12:00','17.2N 108.88W','312.0','11.12','4','1.2','+0.1','No','AS'],
+  ['21 Feb 12:00','19.9N 112.40W','336.0','11.40','4','1.1','-0.1','No','AS'],
+  ['22 Feb 12:00','22.5N 115.99W','360.0','11.17','4','1.3','+0.0','No','AS'],
+  ['23 Feb 12:00','25.0N 119.45W','384.0','11.65','3','0.8','+0.2','No','AS'],
+  ['24 Feb 12:00','27.4N 122.88W','408.0','11.65','4','1.0','+0.1','No','AS'],
+  ['25 Feb 12:00','29.6N 126.10W','432.0','11.17','4','1.4','-0.1','No','AS'],
+  ['26 Feb 12:00','31.5N 129.18W','456.0','11.36','5','1.7','-0.2','No','—'],
+  ['27 Feb 12:00','33.0N 132.10W','480.0','11.17','5','2.0','-0.3','No','—'],
+  ['28 Feb 12:00','34.4N 134.88W','504.0','11.68','4','1.2','+0.2','No','AS'],
+  ['01 Mar 12:00','35.5N 137.55W','528.0','11.83','4','1.1','+0.1','No','AS'],
+  ['02 Mar 12:00','36.5N 140.10W','552.0','11.17','5','1.8','-0.2','No','—'],
+  ['03 Mar 12:00','37.3N 142.52W','576.0','10.92','5','1.9','-0.3','No','—'],
+  ['04 Mar 12:00','37.9N 144.80W','600.0','10.60','6','2.5','-0.5','No','—'],
+  ['05 Mar 12:00','38.3N 146.95W','624.0','11.17','4','1.3','+0.0','No','AS'],
+  ['06 Mar 12:00','38.6N 148.95W','648.0','11.58','4','1.0','+0.1','No','AS'],
+  ['07 Mar 12:00','38.7N 150.82W','672.0','11.71','3','0.9','+0.2','No','AS'],
+  ['08 Mar 12:00','38.6N 152.55W','696.0','10.56','6','2.7','-0.5','No','—'],
+  ['09 Mar 12:00','38.4N 154.15W','720.0','10.42','6','2.9','-0.6','No','—'],
+  ['10 Mar 12:00','38.1N 155.62W','744.0','11.13','4','1.2','+0.0','No','AS'],
+  ['11 Mar 12:00','37.7N 156.97W','768.0','11.67','4','1.1','+0.1','No','AS'],
+  ['12 Mar 12:00','37.2N 158.20W','792.0','11.44','4','1.3','-0.1','No','AS'],
+  ['13 Mar 12:00','36.6N 159.32W','816.0','11.58','3','0.9','+0.2','No','AS'],
+  ['14 Mar 12:00','35.9N 160.33W','840.0','11.00','5','1.6','-0.2','No','—'],
+  ['15 Mar 12:00','35.1N 161.23W','864.0','10.12','6','2.6','-0.5','No','—'],
+  ['16 Mar 12:00','34.2N 162.03W','888.0','9.79','7','3.2','-0.8','No','—'],
+  ['17 Mar 12:00','33.2N 162.73W','912.0','11.00','4','1.2','+0.1','No','AS'],
+  ['18 Mar 12:00','32.1N 163.33W','936.0','10.42','6','2.4','-0.4','No','—'],
+  ['20 Mar 12:00','30.8N 164.48W','984.0','10.08','7','3.4','-0.7','No','—'],
+  ['21 Mar 12:00','29.5N 164.98W','1008.0','9.50','7','3.8','-0.9','No','—'],
+  ['22 Mar 12:00','28.0N 165.38W','1032.0','9.71','6','3.0','-0.7','No','—'],
+  ['23 Mar 12:00','26.4N 165.68W','1056.0','10.25','5','1.7','-0.3','No','—'],
+  ['24 Mar 12:00','24.7N 165.88W','1080.0','10.00','6','2.5','-0.5','No','—'],
+  ['25 Mar 12:00','22.9N 165.98W','1104.0','10.54','5','1.6','-0.2','No','—'],
+  ['26 Mar 12:00','21.0N 165.98W','1128.0','9.79','7','3.5','-0.8','No','—'],
+  ['27 Mar 12:00','19.0N 165.88W','1152.0','10.08','6','2.8','-0.6','No','—'],
+  ['28 Mar 12:00','22.8N 162.50W','1176.0','9.63','7','3.6','-0.9','No','—'],
+  ['29 Mar 12:00','27.5N 157.00W','1200.0','10.83','4','1.3','+0.1','No','AS'],
+  ['30 Mar 12:00','32.0N 151.20W','1224.0','11.44','4','1.2','+0.0','No','AS'],
+  ['31 Mar 12:00','34.0N 138.00W','1248.0','7.75','5','1.9','-0.5','No','—'],
+  ['01 Apr 12:00','35.5N 132.00W','1272.0','9.21','6','2.4','-0.6','No','—'],
+  ['02 Apr 12:00','36.5N 127.00W','1296.0','11.52','4','1.1','+0.2','No','AS'],
+  ['03 Apr 04:00','38.27N 121.62E','1272.5','11.71','4','0.9','-0.3','No','AS'],
+  ['03 Apr 12:30','Jinzhou EOSP','100.0','11.76','4','0.9','+0.6','No','AS']
+];
+
+function buildNoon(){
+  const tb=document.getElementById('nbody');
+  if(!tb)return;
+  NR.forEach(r=>{
+    const [dt,pos,hrs,spd,bf,swh,curr,gw,exc]=r;
+    const sp=parseFloat(spd);
+    const sw=parseFloat(swh);
+    const sc=sp>=12.0?'var(--green)':sp>=11.5?'var(--amber)':'var(--red)';
+    const wc=sw<=1.25?'var(--green)':'var(--red)';
+    const gwCell=gw.includes('\u2691')?'<td style="background:var(--gl);font-size:11px;">'+gw+'</td>':'<td>'+gw+'</td>';
+    const excTag=exc==='AS'||exc==='—'?'<span class="tinf">'+exc+'</span>':'<span class="tbad">'+exc+'</span>';
+    tb.insertAdjacentHTML('beforeend',
+      '<tr>'+
+      '<td class="mono" style="font-size:11px;white-space:nowrap;">'+dt+'</td>'+
+      '<td class="mono" style="font-size:11px;">'+pos+'</td>'+
+      '<td class="mono" style="text-align:right;">'+hrs+'</td>'+
+      '<td class="mono" style="text-align:right;color:'+sc+';font-weight:500;">'+spd+'</td>'+
+      '<td class="mono" style="text-align:center;">'+bf+'</td>'+
+      '<td class="mono" style="text-align:center;color:'+wc+'">'+swh+'</td>'+
+      '<td class="mono" style="text-align:right;">'+curr+'</td>'+
+      gwCell+
+      '<td style="text-align:center;">'+excTag+'</td>'+
+      '</tr>'
+    );
+  });
+}
+</script>
+
+<script>
+// ── AI CONTEXT ──
+const CTX=`MARITIME SPEED CLAIM ANALYSIS — CharterGuard System
+
+VESSEL: MV Yangtze Brightness | IMO: 9953365
+CP: BTB Gloria Confidence dated 14 February 2025
+PARTIES: Owners: BTB Transport S.A. | Charterers: BTB Transport S.A.
+VOYAGE: Puerto Patache, Chile → Jinzhou, China
+DISTANCE: 10,787 NM (sea buoy to sea buoy)
+DURATION: 9 Feb 2025 15:00 → 3 Apr 2025 04:00 (53 days, 46 noon reports)
+HIRE RATE: USD 19,167/day = USD 798.63/hour
+
+CP WARRANTIES (Clause 16):
+- Speed: about 12.00 knots (ABT ±0.5 kts → floor 11.50 kts for breach determination ONLY)
+- Consumption: about 28.0 MT IFO 380
+- Conditions: Good weather = BF≤4 AND SWH≤1.25m
+
+GOOD WEATHER ANALYSIS (42 speed observations):
+- GW period identified: 09 Feb 15:00 – 10 Feb 23:30 (32.5 consecutive hours, Yellow Sea)
+- Conditions: BF≤3, SWH≤0.9m throughout
+- Observed GW average speed: 10.76 knots
+- CP warranted speed: 12.00 knots
+- Deficit: -1.24 knots (-10.3%)
+
+BREACH CONFIRMATION:
+- ABT floor: 12.00 - 0.50 = 11.50 kts
+- Observed: 10.76 kts < 11.50 kts → BREACH CONFIRMED
+
+CRITICAL ABT METHODOLOGY:
+The ABT (±0.5 kts) has ONE function only — determining whether breach exists (ABT floor: 12.0 - 0.5 = 11.50 kts). Once breach is confirmed, the quantum is ALWAYS calculated against the full CP warranted speed (12.00 kts), NOT against the ABT floor (11.50 kts). Using the ABT floor for quantum would constitute impermissible double-counting that benefits the owner unfairly.
+
+QUANTUM CALCULATION (CORRECT):
+- Time taken:    10,787 NM ÷ 10.76 kts = 1,002.3 hrs
+- Time warranted: 10,787 NM ÷ 12.00 kts = 899.0 hrs
+- Time lost: 103.3 hrs × USD 798.63/hr = USD 62,350 ✓
+
+QUANTUM (INCORRECT — for reference only):
+- If calculated vs ABT floor 11.50: 10,787 ÷ 11.50 = 938.0 hrs → 64.3 hrs → USD 38,860 ✗
+- This would understate the claim by USD 23,490
+
+APPLICABLE LAW:
+- The Didymi [1988] 2 LLR 108 — 3-stage test (warranty → GW period → observed speed)
+- The Gas Enterprise [1993] 2 LLR 352 — extrapolation to full voyage
+- The Ocean Virgo [2015] EWHC 3405 — 14-16 hrs GW sufficient (our 32.5 hrs exceeds threshold)
+- The Pamphilos [2002] 2 LLR 681 — ABT does not modify CP speed for quantum
+- The Delecta [2012] EWCA Civ 996 — definition of "about" in speed warranty
+- The Leonidas D [1985] 2 LLR 18 — BF≤4 SWH≤1.25m GW standard
+
+PROCEDURE: LMAA Small Claims (claim < USD 100,000 threshold)
+GOVERNING LAW: English law`;
+
+// ── AI PROMPTS ──
+const PROMPTS={
+  claim:`${CTX}
+
+TASK: Provide a thorough legal analysis supporting the charterers' speed claim of USD 62,350 against MV Yangtze Brightness. Structure your analysis as: (1) Summary of claim strength, (2) Application of The Didymi 3-stage test, (3) GW period adequacy under The Ocean Virgo, (4) Correct ABT methodology and why USD 62,350 not USD 38,860, (5) Extrapolation justification under The Gas Enterprise, (6) Recommendation on LMAA Small Claims procedure.`,
+
+  noclaim:`${CTX}
+
+TASK: Act as devil's advocate and identify the strongest arguments that owners could raise against this speed claim. Analyze: (1) Potential challenges to the GW period identification (32.5 hrs Yellow Sea), (2) Arguments about Kuroshio current influence, (3) Whether the 3 "potential GW" reports are genuinely excludable, (4) Any offsetting savings arguments, (5) Overall assessment of owners' defense prospects. Be balanced but thorough.`,
+
+  strategy:`${CTX}
+
+TASK: Advise on optimal arbitration strategy for charterers pursuing USD 62,350 in LMAA Small Claims proceedings. Address: (1) Whether to proceed with Small Claims or full arbitration, (2) Evidence priorities — which noon reports and documents are critical, (3) Expert witness requirements (meteorological, nautical), (4) Settlement strategy and timing, (5) Costs exposure analysis, (6) Timeline from notice of arbitration to award.`,
+
+  rebuttal:`${CTX}
+
+TASK: Draft a detailed rebuttal to the likely defense arguments owners will raise. Specifically rebut: (1) Any Kuroshio/favorable current argument, (2) Any challenge to the 32.5 hr GW period in Yellow Sea, (3) Any attempt to calculate quantum against ABT floor (11.50 kts) rather than CP warranted speed (12.00 kts), (4) Any force majeure or weather-related excuses for the Pacific crossing deficiency. Ground each rebuttal in the applicable case law.`
 };
 
-/* ═══════ NOON DATA (37 reports) ═══════ */
-const ND = [
-  {d:'01 Jun',p:'12.3°S 78.2°W',nm:278,s:13.5,b:3,h:0.9,c:'0.3kN E',gw:true,r:''},
-  {d:'02 Jun',p:'07.8°S 84.1°W',nm:276,s:13.3,b:3,h:1.0,c:'0.4kN E',gw:true,r:''},
-  {d:'03 Jun',p:'03.2°S 90.3°W',nm:268,s:12.8,b:4,h:1.4,c:'0.5kN E',gw:false,r:'SWH 1.4m > 1.25m'},
-  {d:'04 Jun',p:'01.8°N 96.2°W',nm:255,s:12.2,b:4,h:1.7,c:'0.6kN NE',gw:false,r:'SWH 1.7m > 1.25m'},
-  {d:'05 Jun',p:'06.4°N 102.0°W',nm:248,s:11.8,b:5,h:2.0,c:'0.5kN N',gw:false,r:'BF5 > 4 / SWH 2.0m'},
-  {d:'06 Jun',p:'11.2°N 107.5°W',nm:242,s:11.5,b:5,h:2.1,c:'0.4kN N',gw:false,r:'BF5 > 4 / SWH 2.1m'},
-  {d:'07 Jun',p:'15.8°N 112.8°W',nm:238,s:11.2,b:5,h:2.3,c:'0.3kN NW',gw:false,r:'BF5 > 4 / SWH 2.3m'},
-  {d:'08 Jun',p:'20.1°N 117.9°W',nm:232,s:11.0,b:6,h:2.5,c:'0.2kN NW',gw:false,r:'BF6 > 4 / SWH 2.5m'},
-  {d:'09 Jun',p:'24.0°N 122.8°W',nm:228,s:10.8,b:6,h:2.8,c:'0.4kN W',gw:false,r:'BF6 > 4 / SWH 2.8m'},
-  {d:'10 Jun',p:'27.5°N 127.5°W',nm:225,s:10.7,b:7,h:3.2,c:'0.5kN W',gw:false,r:'BF7 > 4 / SWH 3.2m'},
-  {d:'11 Jun',p:'30.5°N 132.0°W',nm:222,s:10.9,b:7,h:3.5,c:'0.6kN W',gw:false,r:'BF7 > 4 / SWH 3.5m'},
-  {d:'12 Jun',p:'33.1°N 136.3°W',nm:220,s:10.8,b:7,h:3.8,c:'0.7kN W',gw:false,r:'BF7 > 4 / SWH 3.8m'},
-  {d:'13 Jun',p:'35.0°N 140.5°W',nm:222,s:11.0,b:6,h:3.5,c:'0.6kN W',gw:false,r:'BF6 > 4 / SWH 3.5m'},
-  {d:'14 Jun',p:'36.4°N 144.6°W',nm:226,s:11.5,b:6,h:3.0,c:'0.5kN W',gw:false,r:'BF6 > 4 / SWH 3.0m'},
-  {d:'15 Jun',p:'37.5°N 148.6°W',nm:228,s:11.8,b:5,h:2.8,c:'0.4kN W',gw:false,r:'BF5 > 4 / SWH 2.8m'},
-  {d:'16 Jun',p:'38.3°N 152.5°W',nm:230,s:12.0,b:5,h:2.5,c:'0.4kN W',gw:false,r:'BF5 > 4 / SWH 2.5m'},
-  {d:'17 Jun',p:'38.8°N 156.5°W',nm:228,s:11.8,b:5,h:2.2,c:'0.3kN W',gw:false,r:'BF5 > 4 / SWH 2.2m'},
-  {d:'18 Jun',p:'39.2°N 160.4°W',nm:225,s:11.5,b:5,h:2.0,c:'0.3kN W',gw:false,r:'BF5 > 4 / SWH 2.0m'},
-  {d:'19 Jun',p:'39.4°N 164.3°W',nm:228,s:11.8,b:5,h:2.2,c:'0.2kN W',gw:false,r:'BF5 > 4 / SWH 2.2m'},
-  {d:'20 Jun',p:'39.5°N 168.2°W',nm:230,s:12.0,b:5,h:2.0,c:'0.2kN W',gw:false,r:'BF5 > 4 / SWH 2.0m'},
-  {d:'21 Jun',p:'39.4°N 172.1°W',nm:228,s:11.8,b:5,h:1.8,c:'0.3kN W',gw:false,r:'BF5 > 4 / SWH 1.8m'},
-  {d:'22 Jun',p:'39.2°N 176.0°W',nm:225,s:11.5,b:5,h:1.9,c:'0.3kN NW',gw:false,r:'BF5 > 4 / SWH 1.9m'},
-  {d:'23 Jun',p:'38.9°N 179.9°E',nm:228,s:11.8,b:5,h:1.8,c:'0.4kN NW',gw:false,r:'BF5 > 4 / SWH 1.8m'},
-  {d:'24 Jun',p:'38.5°N 176.2°E',nm:230,s:12.0,b:5,h:1.7,c:'0.4kN NW',gw:false,r:'BF5 > 4 / SWH 1.7m'},
-  {d:'25 Jun',p:'38.0°N 172.3°E',nm:232,s:12.2,b:4,h:1.6,c:'0.3kN N',gw:false,r:'SWH 1.6m > 1.25m'},
-  {d:'26 Jun',p:'37.4°N 168.4°E',nm:235,s:12.5,b:4,h:1.4,c:'0.3kN N',gw:false,r:'SWH 1.4m > 1.25m'},
-  {d:'27 Jun',p:'36.7°N 164.5°E',nm:238,s:12.8,b:4,h:1.3,c:'0.2kN N',gw:false,r:'SWH 1.3m > 1.25m'},
-  {d:'28 Jun',p:'35.9°N 160.6°E',nm:240,s:13.0,b:3,h:1.1,c:'0.2kN N',gw:true,r:''},
-  {d:'29 Jun',p:'35.1°N 156.7°E',nm:242,s:13.1,b:3,h:0.9,c:'0.1kN N',gw:true,r:''},
-  {d:'30 Jun',p:'34.3°N 152.8°E',nm:244,s:13.2,b:3,h:0.8,c:'0.1kN N',gw:true,r:''},
-  {d:'01 Jul',p:'33.6°N 148.9°E',nm:245,s:13.3,b:3,h:0.8,c:'0.2kN N',gw:true,r:''},
-  {d:'02 Jul',p:'33.1°N 145.0°E',nm:243,s:13.1,b:3,h:0.8,c:'0.2kN N',gw:true,r:''},
-  {d:'03 Jul',p:'32.8°N 141.1°E',nm:244,s:13.2,b:3,h:0.7,c:'0.2kN N',gw:true,r:''},
-  {d:'04 Jul',p:'32.5°N 137.2°E',nm:244,s:13.2,b:3,h:0.7,c:'0.1kN N',gw:true,r:''},
-  {d:'05 Jul',p:'32.2°N 133.3°E',nm:243,s:13.1,b:3,h:0.7,c:'0.1kN N',gw:true,r:''},
-  {d:'06 Jul',p:'32.0°N 129.4°E',nm:244,s:13.2,b:3,h:0.8,c:'0.2kN N',gw:true,r:''},
-  {d:'07 Jul',p:'36.1°N 120.5°E',nm:270,s:13.1,b:3,h:0.8,c:'0.2kN N',gw:true,r:''},
-];
-
-const WX = [
-  {period:'01–02 Jun',bf:'BF 3',swh:'0.9–1.0m',hrs:48,type:'gw',lbl:'✓ Good Weather'},
-  {period:'03–04 Jun',bf:'BF 4',swh:'1.4–1.7m',hrs:48,type:'excl',lbl:'✗ SWH > 1.25m'},
-  {period:'05–12 Jun',bf:'BF 5–7',swh:'2.0–3.8m',hrs:192,type:'excl',lbl:'✗ Storm — BF > 4'},
-  {period:'13–24 Jun',bf:'BF 5–6',swh:'1.7–3.5m',hrs:288,type:'excl',lbl:'✗ BF > 4 / SWH > 1.25m'},
-  {period:'25–27 Jun',bf:'BF 4',swh:'1.3–1.6m',hrs:72,type:'excl',lbl:'✗ SWH > 1.25m'},
-  {period:'28 Jun–07 Jul',bf:'BF 3',swh:'0.7–1.1m',hrs:240,type:'gw',lbl:'✓ Good Weather — Yellow Sea'},
-  {period:'⚑ GW WINDOW',bf:'BF 3',swh:'0.7–0.8m',hrs:32.5,type:'gw-final',lbl:'⚑ Qualifying: 32.5 hrs — Ocean Virgo ≥24h ✓'},
-];
-</script>
-<script>
-/* ═══════ TAB NAV ═══════ */
-function switchTab(id){
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelector('[data-tab="'+id+'"]').classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-/* ═══════ VESSEL CHIP ═══════ */
-function onVesselInput(v){ STATE.vessel=v; updateChip(); }
-function updateChip(){
-  const n=document.getElementById('vname');
-  const d=document.getElementById('vdot');
-  if(STATE.vessel){ n.textContent=STATE.vessel.toUpperCase(); d.classList.add('on'); }
-  else { n.textContent='No vessel loaded'; d.classList.remove('on'); }
-}
-
-/* ═══════ CP UPLOAD ═══════ */
-const CP_STEPS=[
-  'Parsing document structure...',
-  'Extracting vessel identification...',
-  'Reading hire and payment terms...',
-  'Extracting speed/consumption warranties...',
-  'Parsing weather exclusion clauses...',
-  'Reading governing law and jurisdiction...',
-  'Auto-filling form fields...'
-];
-let cpBusy=false;
-function handleCPUpload(){
-  if(cpBusy||STATE.cpLoaded) return;
-  cpBusy=true;
-  const zone=document.getElementById('cp-zone');
-  const prog=document.getElementById('cp-prog');
-  const bar=document.getElementById('cp-bar');
-  const step=document.getElementById('cp-step');
-  prog.classList.remove('hidden');
-  zone.classList.add('loading');
-  let i=0;
-  (function tick(){
-    if(i>=CP_STEPS.length){
-      zone.classList.remove('loading');
-      zone.classList.add('done');
-      zone.querySelector('.up-icon').textContent='✓';
-      zone.querySelector('.up-title').textContent='Charter Party Loaded';
-      zone.querySelector('.up-sub').textContent='CL Zhangjiajie — COA UMX 2025/2026';
-      step.textContent='Extraction complete ✓';
-      bar.style.width='100%';
-      autoFillCP();
-      cpBusy=false;
-      return;
-    }
-    step.textContent=CP_STEPS[i];
-    bar.style.width=((i+1)/CP_STEPS.length*100)+'%';
-    i++; setTimeout(tick,350);
-  })();
-}
-
-function autoFillCP(){
-  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.value=v; };
-  set('f-vessel','CL ZHANGJIAJIE');
-  set('f-imo','9953365');
-  set('f-cpdate','2025-01-15');
-  set('f-charterers','Horizon Shipping (Panama) Inc.');
-  set('f-owners','Hong Glory Shipping Co. Ltd.');
-  set('f-delivery','Callao, Peru — DLOSP IWL');
-  set('f-redelivery','CJK range (China/Japan/Korea), 1 SP');
-  set('f-hire','19167');
-  set('f-law','english');
-  set('f-lmaa','50000');
-  set('f-routing','bluewaterboss');
-  set('f-spdL','13.5');
-  set('f-cnsL','25.0');
-  set('f-spdB','14.0');
-  set('f-cnsB','23.5');
-  set('f-abtSpd','0.5');
-  set('f-abtCns','5');
-  set('f-gw','bf4swh125');
-  set('f-basis','seabuoy');
-  set('f-offset','yes');
-  set('f-vlsfo','850');
-  set('f-clause',
-`SPEED AND CONSUMPTION WARRANTIES — LADEN CONDITION:
-
-The vessel to maintain an average speed of about (ABT) 13.5 knots on a consumption of about (ABT) 25.0 metric tons per day of VLSFO, in good weather conditions up to and including Beaufort Force 4 and significant wave height not exceeding 1.25 metres on a 24-hour consecutive basis.
-
-BALLAST CONDITION: ABT 14.0 knots on ABT 23.5 MT/day VLSFO.
-
-GOOD WEATHER DEFINITION: For the purpose of this Charter Party, "good weather" shall mean conditions where the Beaufort wind scale does not exceed Force 4 AND the significant wave height does not exceed 1.25 metres, measured on a consecutive 24-hour basis as reported by the appointed routing service (Blue Water BOSS).
-
-PERFORMANCE ASSESSMENT BASIS: Sea buoy to sea buoy, excluding port time and canal transits.
-
-OFFSETTING CLAUSE: Any bunker savings achieved against the CP consumption warranty shall be offset against any time loss claim on a per-voyage basis. Specifically, if actual consumption is less than the warranted consumption, the monetary value of such saving (calculated at the BOD VLSFO price) shall be deducted from any time loss claim arising from the same voyage.
-
-ECO RPM CLAUSE: The Master is at liberty to raise engine RPM up to but not exceeding the contractual speed in adverse weather, provided such increase does not result in consumption exceeding the warranted daily consumption by more than 5% (the ABT tolerance). Any period of increased RPM operation shall be reported in the noon reports and endorsed by the appointed routing service.
-
-All speed and consumption warranties are given "about" (ABT) with a tolerance of ±0.5 knots for speed and ±5% for consumption, in good weather conditions as defined above.
-
-Law and arbitration: English Law, London arbitration per LMAA Terms (current edition). Small claims procedure applies for disputes below USD 50,000.`);
-  STATE.vessel='CL ZHANGJIAJIE'; STATE.imo='9953365'; STATE.cpDate='2025-01-15';
-  STATE.charterers='Horizon Shipping (Panama) Inc.'; STATE.owners='Hong Glory Shipping Co. Ltd.';
-  STATE.hire=19167; STATE.law='english'; STATE.lmaaThreshold=50000;
-  STATE.cpSpdL=13.5; STATE.cpCnsL=25.0; STATE.cpSpdB=14.0; STATE.cpCnsB=23.5;
-  STATE.abtSpd=0.5; STATE.abtCns=5; STATE.offset='yes'; STATE.vlsfo=850;
-  STATE.routingCo='Blue Water BOSS'; STATE.clauseText=document.getElementById('f-clause').value;
-  STATE.cpLoaded=true;
-  updateChip();
-}
-
-/* ═══════ Q88 UPLOAD ═══════ */
-const Q88_STEPS=[
-  'Parsing Q88 questionnaire format...',
-  'Extracting vessel dimensions...',
-  'Reading capacity and cargo specs...',
-  'Extracting machinery details...',
-  'Reading class and flag details...',
-  'Auto-filling vessel specifications...'
-];
-let q88Busy=false;
-function handleQ88Upload(){
-  if(q88Busy) return;
-  q88Busy=true;
-  const zone=document.getElementById('q88-zone');
-  const prog=document.getElementById('q88-prog');
-  const bar=document.getElementById('q88-bar');
-  const step=document.getElementById('q88-step');
-  prog.classList.remove('hidden');
-  zone.classList.add('loading');
-  let i=0;
-  (function tick(){
-    if(i>=Q88_STEPS.length){
-      zone.classList.remove('loading'); zone.classList.add('done');
-      zone.querySelector('.up-icon').textContent='✓';
-      zone.querySelector('.up-title').textContent='Q88 Loaded';
-      zone.querySelector('.up-sub').textContent='CL ZHANGJIAJIE — IMO 9953365';
-      step.textContent='Vessel specs extracted ✓'; bar.style.width='100%';
-      document.getElementById('f-dwt').value='82,000 MT';
-      document.getElementById('f-flag').value='Panama / NK (Nippon Kaiji)';
-      document.getElementById('f-loa').value='229.0m / 32.26m';
-      document.getElementById('f-holds').value='5 / 5';
-      document.getElementById('f-grain').value='96,500 CBM';
-      document.getElementById('f-cranes').value='4 × 30mt Liebherr';
-      q88Busy=false; return;
-    }
-    step.textContent=Q88_STEPS[i];
-    bar.style.width=((i+1)/Q88_STEPS.length*100)+'%';
-    i++; setTimeout(tick,350);
-  })();
-}
-
-/* ═══════ REPORT UPLOAD ═══════ */
-const REP_STEPS=[
-  'Parsing noon report format...',
-  'Extracting voyage metadata...',
-  'Reading daily position logs...',
-  'Processing speed and consumption data...',
-  'Analysing Blue Water BOSS weather data...',
-  'Identifying good weather periods...',
-  'Applying BF≤4 / SWH≤1.25m criterion...',
-  'Calculating performance deltas...',
-  'Generating breach analysis...'
-];
-let repBusy=false;
-function handleReportUpload(){
-  if(repBusy||STATE.reportLoaded) return;
-  repBusy=true;
-  const zone=document.getElementById('rep-zone');
-  const prog=document.getElementById('rep-prog');
-  const bar=document.getElementById('rep-bar');
-  const step=document.getElementById('rep-step');
-  prog.classList.remove('hidden');
-  zone.classList.add('loading');
-  let i=0;
-  (function tick(){
-    if(i>=REP_STEPS.length){
-      zone.classList.remove('loading'); zone.classList.add('done');
-      zone.querySelector('.up-icon').textContent='✓';
-      zone.querySelector('.up-title').textContent='Performance Report Loaded';
-      zone.querySelector('.up-sub').textContent='37 noon reports — CL Zhangjiajie Pacific Crossing';
-      step.textContent='Report extraction complete ✓'; bar.style.width='100%';
-      STATE.reportLoaded=true;
-      runCalc(); renderVoyage(); updateVerdict();
-      repBusy=false; return;
-    }
-    step.textContent=REP_STEPS[i];
-    bar.style.width=((i+1)/REP_STEPS.length*100)+'%';
-    i++; setTimeout(tick,370);
-  })();
-}
-
-/* ═══════ SAVE CP ═══════ */
-function saveCPState(){
-  const g=id=>parseFloat(document.getElementById(id).value)||0;
-  const gs=id=>document.getElementById(id).value||'';
-  STATE.vessel=gs('f-vessel'); STATE.imo=gs('f-imo'); STATE.cpDate=gs('f-cpdate');
-  STATE.charterers=gs('f-charterers'); STATE.owners=gs('f-owners');
-  STATE.delivPort=gs('f-delivery'); STATE.redelRange=gs('f-redelivery');
-  STATE.hire=g('f-hire'); STATE.law=gs('f-law'); STATE.lmaaThreshold=g('f-lmaa');
-  STATE.routingCo=gs('f-routing');
-  STATE.cpSpdL=g('f-spdL'); STATE.cpCnsL=g('f-cnsL');
-  STATE.cpSpdB=g('f-spdB'); STATE.cpCnsB=g('f-cnsB');
-  STATE.abtSpd=g('f-abtSpd'); STATE.abtCns=g('f-abtCns');
-  STATE.gwCriteria=gs('f-gw'); STATE.perfBasis=gs('f-basis');
-  STATE.offset=gs('f-offset'); STATE.vlsfo=g('f-vlsfo');
-  STATE.clauseText=gs('f-clause');
-  STATE.cpLoaded=true; updateChip();
-  const btn=event.currentTarget;
-  btn.textContent='✓ Saved'; setTimeout(()=>btn.textContent='💾 Save CP',2000);
-}
-</script>
-<script>
-/* ═══════ CALCULATIONS ═══════ */
-function runCalc(){
-  const tA=STATE.dist/STATE.avgSpd;
-  const tC=STATE.dist/STATE.cpSpdL;
-  STATE.timeLoss=Math.max(0,tA-tC)/24;
-  STATE.timeLossVal=STATE.timeLoss*STATE.hire;
-  STATE.bunkerSaving=Math.max(0,STATE.cpCnsL-STATE.avgCns)*STATE.duration*STATE.vlsfo;
-  STATE.bunkerOvercons=Math.max(0,STATE.avgCns-STATE.cpCnsL*(1+STATE.abtCns/100))*STATE.duration*STATE.vlsfo;
-  STATE.netClaim=STATE.offset==='yes'
-    ? STATE.timeLossVal-STATE.bunkerSaving+STATE.bunkerOvercons
-    : STATE.timeLossVal+STATE.bunkerOvercons;
-  STATE.hasSpeedBreach=STATE.avgSpd<(STATE.cpSpdL-STATE.abtSpd);
-  STATE.hasCnsBreach=STATE.avgCns>STATE.cpCnsL*(1+STATE.abtCns/100);
-}
-
-function f2(n,d=2){ return Number(n).toFixed(d); }
-function usd(n){ return '$'+Math.round(n).toLocaleString(); }
-
-/* ═══════ RENDER VOYAGE SUMMARY ═══════ */
-function renderVoyage(){
-  document.getElementById('vdata').classList.remove('hidden');
-  renderMetrics();
-  renderAlerts();
-  renderChart();
-  renderWxTable();
-  renderNoonTable();
-  renderCalcTable();
-}
-
-/* Metric cards */
-function renderMetrics(){
-  const cpS=STATE.cpSpdL, abt=STATE.abtSpd;
-  const dS=STATE.avgSpd-cpS;
-  const dC=STATE.avgCns-STATE.cpCnsL;
-  const cards=[
-    {
-      lbl:'Avg Speed Laden',
-      val:f2(STATE.avgSpd,1)+' kts',
-      cls:STATE.hasSpeedBreach?'cred':(Math.abs(dS)<=abt&&dS<0?'camber':'cgreen'),
-      ref:'CP: '+cpS+' kts ABT \u00b1'+abt,
-      badge:(dS>=0?'+':'')+f2(dS,1)+' kts',
-      btag:STATE.hasSpeedBreach?'tbad':(dS>=0?'tok':'twarn')
-    },
-    {
-      lbl:'Avg Consumption',
-      val:f2(STATE.avgCns,1)+' MT/d',
-      cls:STATE.hasCnsBreach?'cred':'cgreen',
-      ref:'CP: '+STATE.cpCnsL+' MT/day ABT \u00b1'+STATE.abtCns+'%',
-      badge:(dC>=0?'+':'')+f2(dC,1)+' MT/d',
-      btag:STATE.hasCnsBreach?'tbad':'tok'
-    },
-    {
-      lbl:'Good Weather Hours',
-      val:STATE.gw+' hrs',
-      cls:STATE.gw<24?'cred':(STATE.gw<48?'camber':'cgreen'),
-      ref:'BF\u22644 AND SWH\u22641.25m / 24h consec.',
-      badge:STATE.gw>=24?'Ocean Virgo \u2713':'< 24h threshold',
-      btag:STATE.gw>=24?'tok':'tbad'
-    },
-    {
-      lbl:'Voyage Distance',
-      val:STATE.dist.toLocaleString()+' NM',
-      cls:'caccent',
-      ref:STATE.duration+' days \u00b7 '+Math.round(STATE.avgCns*STATE.duration).toLocaleString()+' MT VLSFO total',
-      badge:STATE.duration+' days',
-      btag:'tinf'
-    }
-  ];
-  document.getElementById('metric-cards').innerHTML=cards.map(c=>`
-    <div class="mc">
-      <div class="mc-lbl">${c.lbl}</div>
-      <div class="mc-val ${c.cls}">${c.val}</div>
-      <div class="mc-ref">${c.ref}</div>
-      <span class="tag ${c.btag}">${c.badge}</span>
-    </div>`).join('');
-}
-
-/* Alerts */
-function renderAlerts(){
-  const el=document.getElementById('alerts-zone');
-  let html='';
-  if(STATE.hasSpeedBreach){
-    const delta=f2(STATE.cpSpdL-STATE.avgSpd,1);
-    html+=`<div class="alert alert-red">
-      <div class="alert-icon">&#9888;</div>
-      <div class="alert-body">
-        <div class="alert-title">Speed Breach Confirmed</div>
-        <div class="alert-text">
-          Actual avg speed <strong>${f2(STATE.avgSpd,1)} kts</strong> vs CP warranty <strong>${STATE.cpSpdL} kts ABT \u00b1${STATE.abtSpd}</strong>.
-          Shortfall: <strong>${delta} kts</strong> &mdash; exceeds ABT tolerance.<br>
-          GW analysis: <strong>${STATE.gw} hrs</strong> qualifying good weather (Yellow Sea, Days 28&ndash;37).
-          Per <em>The Ocean Virgo</em> [2015] EWHC 3405 minimum 24h threshold is met (${STATE.gw}h \u2265 24h \u2713).
-          Three-stage test per <em>The Didymi</em> [1988] 2 LLR 108 applicable.
-        </div>
-      </div></div>`;
-  }
-  if(STATE.hasCnsBreach){
-    html+=`<div class="alert alert-red">
-      <div class="alert-icon">&#9888;</div>
-      <div class="alert-body">
-        <div class="alert-title">Overconsumption Breach Confirmed</div>
-        <div class="alert-text">Actual <strong>${f2(STATE.avgCns,1)} MT/day</strong> exceeds CP+5% ABT (<strong>${f2(STATE.cpCnsL*1.05,2)} MT/day</strong>).</div>
-      </div></div>`;
-  }
-  if(!STATE.hasCnsBreach&&STATE.avgCns<STATE.cpCnsL){
-    html+=`<div class="alert alert-amber">
-      <div class="alert-icon">&#9889;</div>
-      <div class="alert-body">
-        <div class="alert-title">Offsetting Clause Applies &mdash; Bunker Saving</div>
-        <div class="alert-text">
-          Actual consumption <strong>${f2(STATE.avgCns,1)} MT/day</strong> is <strong>${f2(STATE.cpCnsL-STATE.avgCns,1)} MT/day below CP warranty</strong>.<br>
-          Bunker saving: ${f2(STATE.cpCnsL-STATE.avgCns,1)} MT/d &times; ${STATE.duration} days &times; $${STATE.vlsfo}/MT = <strong>${usd(STATE.bunkerSaving)}</strong>.<br>
-          Per offsetting clause, deducted from time loss claim. Net claim: <strong>${usd(STATE.netClaim)}</strong>.
-        </div>
-      </div></div>`;
-  }
-  if(!STATE.hasSpeedBreach&&!STATE.hasCnsBreach){
-    html+=`<div class="alert alert-green">
-      <div class="alert-icon">&#10003;</div>
-      <div class="alert-body">
-        <div class="alert-title">No Performance Breach Detected</div>
-        <div class="alert-text">Speed and consumption within CP warranty tolerances. No claim arises.</div>
-      </div></div>`;
-  }
-  el.innerHTML=html;
-}
-
-/* Speed Chart */
-function renderChart(){
-  const con=document.getElementById('chart-container');
-  const MAX=16, cpS=STATE.cpSpdL, abt=STATE.abtSpd;
-  const cpPct=(cpS/MAX*100).toFixed(2);
-
-  // Y-axis labels (positioned absolute inside chart-body)
-  const yLbls=[16,14,12,10,8].map(v=>{
-    const pct=(v/MAX*100).toFixed(2);
-    return `<span style="position:absolute;bottom:calc(${pct}% - 6px);left:0;width:32px;text-align:right;font-size:9px;font-family:var(--mono);color:var(--t3);">${v}</span>`;
-  }).join('');
-
-  // Bars
-  const bars=ND.map((n,i)=>{
-    const pct=(n.s/MAX*100).toFixed(2);
-    const cls=n.s<cpS-abt?'cbar-red':(n.s<cpS?'cbar-amber':'cbar-green');
-    const esc=n.d.replace(/'/g,"\\'");
-    return `<div class="chart-bar ${cls}" style="height:${pct}%;flex:1;"
-      onmousemove="showTip(event,'${esc}: ${n.s} kts')"
-      onmouseleave="hideTip()"></div>`;
-  }).join('');
-
-  // X-axis labels every 6
-  const xlbls=ND.map((n,i)=>
-    `<div class="chart-xl">${i%6===0?n.d:''}</div>`
-  ).join('');
-
-  con.innerHTML=`
-    <div class="chart-body" style="gap:2px;">
-      <div class="chart-yaxis" style="position:absolute;left:0;top:0;bottom:0;width:34px;">${yLbls}</div>
-      <div class="cp-line" style="bottom:${cpPct}%;"><span class="cp-line-lbl">CP ${cpS} kts</span></div>
-      <div style="display:flex;align-items:flex-end;gap:2px;width:100%;height:100%;">${bars}</div>
-    </div>
-    <div class="chart-x">${xlbls}</div>`;
-}
-
-/* Weather exclusion table */
-function renderWxTable(){
-  document.getElementById('wx-tbody').innerHTML=WX.map(w=>{
-    const isGW=w.type==='gw'||w.type==='gw-final';
-    const rCls=w.type==='excl'?'row-excl':(isGW?'row-gw':'');
-    const tag=isGW
-      ? (w.type==='gw-final'?`<span class="tag tok">&#9873; GW Qualifying</span>`:`<span class="tag tok">&#10003; Good Weather</span>`)
-      : `<span class="tag tbad">&#10007; Excluded</span>`;
-    return `<tr class="${rCls}">
-      <td class="td-mono" style="font-size:11px;white-space:nowrap;">${w.period}</td>
-      <td>${w.bf}</td>
-      <td>${w.swh}</td>
-      <td class="td-mono">${w.hrs}h</td>
-      <td>${tag}</td>
-    </tr>`;
-  }).join('');
-}
-
-/* Noon table */
-function renderNoonTable(){
-  const cpS=STATE.cpSpdL, abt=STATE.abtSpd;
-  document.getElementById('noon-tbody').innerHTML=ND.map(n=>{
-    const sCls=n.s<cpS-abt?'td-red':(n.s<cpS?'td-amber':'td-green');
-    const hCls=n.h>1.25?'td-sred':'';
-    const gwTag=n.gw?`<span class="tag tok" style="font-size:9px;">GW</span>`:`<span class="tag tbad" style="font-size:9px;">Excl</span>`;
-    const rTag=n.r?`<span class="tag tneu" style="font-size:9px;">${n.r}</span>`:'';
-    const rCls=(n.gw&&!n.r)?'row-gw':'';
-    return `<tr class="${rCls}">
-      <td class="td-mono" style="white-space:nowrap;">${n.d} 12:00Z</td>
-      <td class="td-mono" style="font-size:11px;white-space:nowrap;">${n.p}</td>
-      <td class="td-mono">${n.nm}</td>
-      <td class="${sCls}">${f2(n.s,1)}</td>
-      <td>${n.b}</td>
-      <td class="${hCls} td-mono">${f2(n.h,1)}</td>
-      <td class="td-mono" style="font-size:11px;">${n.c}</td>
-      <td>${gwTag}</td>
-      <td>${rTag}</td>
-    </tr>`;
-  }).join('');
-}
-
-/* Calculation table */
-function renderCalcTable(){
-  const tA=STATE.dist/STATE.avgSpd;
-  const tC=STATE.dist/STATE.cpSpdL;
-  const rows=[
-    ['Distance sea buoy to sea buoy',f2(STATE.dist,0)+' NM',''],
-    ['CP warranted speed',f2(STATE.cpSpdL,1)+' kts',''],
-    ['Actual average speed (GW analysis)',f2(STATE.avgSpd,1)+' kts',''],
-    ['Time at CP speed (dist \u00f7 CP spd)',f2(tC/24,2)+' days ('+f2(tC,1)+' hrs)',''],
-    ['Time at actual speed (dist \u00f7 actual spd)',f2(tA/24,2)+' days ('+f2(tA,1)+' hrs)',''],
-    ['Time loss',f2(STATE.timeLoss,2)+' days','cpos'],
-    ['Time loss value (\u00d7 $'+STATE.hire.toLocaleString()+'/day hire)',usd(STATE.timeLossVal),'cpos'],
-    ['Bunker saving (CP '+STATE.cpCnsL+' \u2212 actual '+STATE.avgCns+' MT/d \u00d7 '+STATE.duration+'d \u00d7 $'+STATE.vlsfo+')','- '+usd(STATE.bunkerSaving),'cneg'],
-    ['Overconsumption value',usd(STATE.bunkerOvercons),STATE.bunkerOvercons>0?'cpos':''],
-    ['NET CLAIM (after offsetting)',usd(STATE.netClaim),'net']
-  ];
-  document.getElementById('calc-tbody').innerHTML=rows.map(r=>{
-    if(r[2]==='net') return `<tr class="net"><td class="net-lbl">${r[0]}</td><td class="net-val">${r[1]}</td></tr>`;
-    return `<tr><td class="clbl">${r[0]}</td><td class="cval ${r[2]}">${r[1]}</td></tr>`;
-  }).join('');
-}
-</script>
-<script>
-/* ═══════ VERDICT CARD ═══════ */
-function updateVerdict(){
-  if(!STATE.reportLoaded) return;
-  const hd=document.getElementById('verdict-hd');
-  const tag=document.getElementById('verdict-tag');
-  const body=document.getElementById('verdict-body');
-  const viable=STATE.netClaim>0&&(STATE.hasSpeedBreach||STATE.hasCnsBreach);
-  if(viable){
-    hd.classList.add('viable');
-    tag.className='tag tbad tlg'; tag.textContent='CLAIM VIABLE';
-    body.innerHTML=`
-      <div class="vsec"><strong>&#9878; Breach Confirmation:</strong>
-        Speed underperformance confirmed. Actual avg: <strong>${f2(STATE.avgSpd,1)} kts</strong> vs CP warranty <strong>${STATE.cpSpdL} kts ABT &plusmn;${STATE.abtSpd}</strong>.
-        Shortfall <strong>${f2(STATE.cpSpdL-STATE.avgSpd,1)} kts</strong> exceeds ABT tolerance.
-        ${STATE.hasCnsBreach?'Overconsumption breach also confirmed.':'No consumption breach (actual '+f2(STATE.avgCns,1)+' MT/day within ABT).'}
-      </div>
-      <div class="vsec"><strong>&#127754; GW Analysis:</strong>
-        <strong>${STATE.gw} hours</strong> qualifying good weather (BF&le;4 AND SWH&le;1.25m, Yellow Sea Days 28&ndash;37).
-        Per <em>The Ocean Virgo</em> [2015] EWHC 3405 minimum 24h threshold met (${STATE.gw}h &ge; 24h &check;).
-        Full voyage averaging per <em>The Gas Enterprise</em> [1993] 2 LLR 352.
-      </div>
-      <div class="vsec"><strong>&#128176; Calculation:</strong>
-        Time loss <strong>${f2(STATE.timeLoss,2)} days</strong> &times; $${STATE.hire.toLocaleString()}/day = <strong>${usd(STATE.timeLossVal)}</strong>.
-        Bunker saving offset: <strong>&minus; ${usd(STATE.bunkerSaving)}</strong>.
-        <strong>Net claim: ${usd(STATE.netClaim)}</strong>.
-        ${STATE.netClaim<STATE.lmaaThreshold?'Note: below LMAA Small Claims threshold ($'+STATE.lmaaThreshold.toLocaleString()+').':'Exceeds LMAA Small Claims threshold &mdash; full arbitration applicable.'}
-      </div>
-      <div class="vsec"><strong>&#128203; Recommendation:</strong>
-        Issue formal claim letter WITHOUT PREJUDICE SAVE AS TO COSTS applying <em>The Didymi</em> three-stage test. Demand response within 48 hours. Reserve all rights.
-      </div>`;
-  } else {
-    hd.classList.remove('viable');
-    tag.className='tag twarn tlg'; tag.textContent='SIN CLAIM MONETARIO';
-    body.innerHTML=`
-      <div class="vsec"><p>Based on current data, no net monetary claim arises from this voyage.
-        ${!STATE.hasSpeedBreach?'Speed within CP warranty. ':''}
-        ${!STATE.hasCnsBreach?'Consumption within CP warranty. ':''}
-        Net position: <strong>${usd(STATE.netClaim)}</strong>.</p></div>
-      <div class="vsec"><p>Economic underperformance exists but offsetting clause eliminates net monetary claim.
-        Consider reviewing future voyage CP terms to improve performance provisions.</p></div>`;
-  }
-}
-
-/* ═══════ STATE CONTEXT STRING ═══════ */
-function getCtx(){
-  return `CHARTER PARTY & VOYAGE CONTEXT
-Vessel: ${STATE.vessel||'CL Zhangjiajie'} (IMO ${STATE.imo||'9953365'})
-Charterers: ${STATE.charterers||'Horizon Shipping (Panama) Inc.'}
-Owners: ${STATE.owners||'Hong Glory Shipping Co. Ltd.'}
-CP Date: ${STATE.cpDate||'15 January 2025'}
-Hire Rate: USD ${STATE.hire.toLocaleString()}/day
-Governing Law: English Law, LMAA arbitration
-LMAA Small Claims Threshold: USD ${STATE.lmaaThreshold.toLocaleString()}
-Routing Company: ${STATE.routingCo||'Blue Water BOSS'}
-
-CP PERFORMANCE WARRANTIES (LADEN)
-Speed: ${STATE.cpSpdL} kts ABT \u00b1${STATE.abtSpd} kts
-Consumption: ${STATE.cpCnsL} MT/day VLSFO ABT \u00b1${STATE.abtCns}%
-Good Weather: BF\u22644 AND SWH\u22641.25m / 24h consecutive
-Assessment Basis: Sea buoy to sea buoy
-Offsetting Clause: ${STATE.offset==='yes'?'YES \u2014 bunker saving offsets time loss':'NO'}
-VLSFO Price (BOD): USD ${STATE.vlsfo}/MT
-
-VOYAGE DATA
-Route: Callao (Peru) \u2192 Qingdao (China) \u2014 Pacific Crossing
-Distance: ${STATE.dist.toLocaleString()} NM (sea buoy to sea buoy)
-Duration: ${STATE.duration} days
-Actual Avg Speed: ${f2(STATE.avgSpd,1)} kts
-Actual Avg Consumption: ${f2(STATE.avgCns,1)} MT/day
-Good Weather Hours: ${STATE.gw} hrs (Yellow Sea approach, Days 28-37)
-
-BREACH FLAGS
-Speed breach: ${STATE.hasSpeedBreach?'YES \u2014 '+f2(STATE.cpSpdL-STATE.avgSpd,1)+' kts shortfall beyond ABT':'NO'}
-Consumption breach: ${STATE.hasCnsBreach?'YES':'NO \u2014 actual under CP warranty'}
-
-CALCULATIONS
-Time at CP speed: ${f2(STATE.dist/STATE.cpSpdL/24,2)} days
-Time at actual speed: ${f2(STATE.dist/STATE.avgSpd/24,2)} days
-Time loss: ${f2(STATE.timeLoss,2)} days
-Time loss value: ${usd(STATE.timeLossVal)}
-Bunker saving: ${usd(STATE.bunkerSaving)} (deducted per offsetting clause)
-Overconsumption: ${usd(STATE.bunkerOvercons)}
-NET CLAIM: ${usd(STATE.netClaim)}
-
-CP CLAUSE TEXT:
-${STATE.clauseText||'(See Tab 1)'}`;
-}
-
-/* ═══════ API CALL ═══════ */
-async function callAPI(system, user, titleText){
-  document.getElementById('out-title').textContent=titleText;
-  const box=document.getElementById('out-box');
-  const key=document.getElementById('api-key').value.trim();
-  if(!key){
-    box.textContent='Please enter your Anthropic API key above.';
-    box.classList.add('muted'); return;
-  }
-  box.classList.add('muted');
-  let dots=0; box.textContent='Generating';
-  const timer=setInterval(()=>{dots=(dots+1)%4; box.textContent='Generating'+'.'.repeat(dots);},400);
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':key,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        system:system,
-        messages:[{role:'user',content:user}]
-      })
-    });
-    clearInterval(timer);
-    if(!res.ok){const e=await res.json(); box.textContent='API Error '+res.status+': '+(e.error?.message||res.statusText); return;}
-    const data=await res.json();
-    box.textContent=data.content[0].text;
-    box.classList.remove('muted');
-  }catch(e){clearInterval(timer); box.textContent='Error: '+e.message;}
-}
-
-function genClaimLetter(){
-  callAPI(
-    'You are a senior maritime lawyer specialising in English law charter party disputes and LMAA arbitration.',
-    getCtx()+`\n\nDraft a formal claim letter for speed underperformance. Requirements:\n1. Open WITHOUT PREJUDICE SAVE AS TO COSTS\n2. Apply The Didymi [1988] 2 LLR 108 three-stage test explicitly\n3. Address GW hours; cite The Ocean Virgo [2015] EWHC 3405 (${STATE.gw} hrs \u2265 24h \u2713)\n4. Cite The Gas Enterprise [1993] 2 LLR 352 for methodology\n5. Show full offsetting calculation clearly (time loss ${usd(STATE.timeLossVal)} minus bunker saving ${usd(STATE.bunkerSaving)} = net ${usd(STATE.netClaim)})\n6. Note LMAA Small Claims procedure if applicable\n7. Demand 48-hour response, reserve all rights\n8. Professional formal English, ready to dispatch`,
-    '\u2696 Claim Letter'
-  );
-}
-
-function genEconLoss(){
-  callAPI(
-    'Eres un experto en reclamaciones mar\u00edtimas y derecho de fletamento con especialidad en an\u00e1lisis econ\u00f3mico.',
-    getCtx()+`\n\nElabora un An\u00e1lisis de P\u00e9rdida Econ\u00f3mica completo en espa\u00f1ol:\n1. Confirmaci\u00f3n t\u00e9cnica del bajo rendimiento\n2. Qu\u00e9 cl\u00e1usulas del CP afectan la reclamaci\u00f3n\n3. Cuantificaci\u00f3n detallada de la p\u00e9rdida econ\u00f3mica en USD\n4. Impacto de la cl\u00e1usula de compensaci\u00f3n (offsetting)\n5. P\u00e9rdida bruta vs neta\n6. Acciones recomendadas para futuros viajes\n7. Mejoras sugeridas en cl\u00e1usulas CP\n8. Opciones legales residuales`,
-    '\ud83d\udcc9 An\u00e1lisis P\u00e9rdida Econ\u00f3mica'
-  );
-}
-
-function genLegalStrategy(){
-  callAPI(
-    'Eres un abogado mar\u00edtimo senior especializado en derecho ingl\u00e9s y arbitraje LMAA.',
-    getCtx()+`\n\nElabora una Estrategia Legal Completa en espa\u00f1ol:\n1. Veredicto inicial\n2. Fortalezas para los fletadores\n3. Debilidades y contraargumentos de los armadores\n4. Estrategia recomendada\n5. Redacci\u00f3n clave para carta de reclamaci\u00f3n\n6. Riesgos procesales (LMAA, costas, plazos)\n7. Pr\u00f3ximos pasos con timeline\n8. Probabilidad de \u00e9xito estimada`,
-    '\u2726 Estrategia Legal Completa'
-  );
-}
-
-function copyOut(btn){
-  navigator.clipboard.writeText(document.getElementById('out-box').textContent).then(()=>{
-    const orig=btn.textContent; btn.textContent='\u2713 Copied';
-    setTimeout(()=>btn.textContent=orig,2000);
+// ── AI FUNCTIONS ──
+function runAI(type){
+  const out=document.getElementById('ai-out');
+  const load=document.getElementById('ai-load');
+  const txt=document.getElementById('ai-text');
+  out.style.display='block';
+  load.style.display='block';
+  txt.textContent='';
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      messages:[{role:'user',content:PROMPTS[type]}]
+    })
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    load.style.display='none';
+    const text=(d.content&&d.content[0]&&d.content[0].text)||JSON.stringify(d);
+    txt.textContent=text;
+  })
+  .catch(e=>{
+    load.style.display='none';
+    txt.textContent='Error: '+e.message+'\n\nNota: Esta función requiere una API key de Anthropic configurada en el servidor proxy.';
   });
 }
 
-function testKey(){
-  const k=document.getElementById('api-key').value.trim();
-  if(!k){alert('Enter an API key first.');return;}
-  alert('Key: '+k.substring(0,12)+'...\nFormat check: '+(k.startsWith('sk-ant-')?'\u2713 Valid format':'\u26a0 Unexpected format'));
+function copyDraft(){
+  const el=document.getElementById('claim-draft');
+  navigator.clipboard.writeText(el.textContent).then(()=>{
+    const b=event.target;
+    const orig=b.textContent;
+    b.textContent='¡Copiado!';
+    setTimeout(()=>b.textContent=orig,1800);
+  });
 }
 
-/* ═══════ CHAT ═══════ */
-const chatHist=[];
-async function sendChat(){
-  const inp=document.getElementById('chat-inp');
-  const msg=inp.value.trim(); if(!msg) return;
+function copyAI(){
+  const el=document.getElementById('ai-text');
+  navigator.clipboard.writeText(el.textContent).then(()=>{
+    const b=event.target;
+    const orig=b.textContent;
+    b.textContent='¡Copiado!';
+    setTimeout(()=>b.textContent=orig,1800);
+  });
+}
+
+// ── CHAT ──
+function sendChat(){
+  const inp=document.getElementById('chatIn');
+  const msgs=document.getElementById('chatMsgs');
+  const q=inp.value.trim();
+  if(!q)return;
   inp.value='';
-  addMsg('user',msg);
-  chatHist.push({role:'user',content:msg});
-  const key=document.getElementById('api-key').value.trim();
-  if(!key){addMsg('ai','Please enter your Anthropic API key to enable AI responses.'); return;}
-  const lid='cl-'+Date.now();
-  addMsg('ai','...',lid);
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',max_tokens:1000,
-        system:'You are a maritime legal AI assistant with expertise in English law, charter party disputes, and LMAA arbitration. Case context:\n\n'+getCtx()+'\n\nBe concise and professional. Reference specific cases and calculations where relevant.',
-        messages:chatHist
-      })
-    });
-    const data=await res.json();
-    const reply=res.ok?data.content[0].text:'Error: '+(data.error?.message||res.statusText);
-    updMsg(lid,reply);
-    chatHist.push({role:'assistant',content:reply});
-  }catch(e){updMsg(lid,'Error: '+e.message);}
+  // User bubble
+  msgs.insertAdjacentHTML('beforeend',
+    '<div style="background:var(--al);border:1px solid var(--am);border-radius:6px;padding:10px 12px;max-width:92%;align-self:flex-end;margin-left:auto;">'+
+    '<div style="font-size:10px;color:var(--t3);font-weight:500;margin-bottom:4px;">Tú</div>'+
+    '<div style="font-size:12px;color:var(--text);">'+q+'</div>'+
+    '</div>'
+  );
+  // Thinking bubble
+  const thinkId='think-'+Date.now();
+  msgs.insertAdjacentHTML('beforeend',
+    '<div id="'+thinkId+'" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;max-width:92%;">'+
+    '<div style="font-size:10px;color:var(--accent);font-weight:500;margin-bottom:4px;">CharterGuard AI</div>'+
+    '<div class="dots"><span></span><span></span><span></span></div>'+
+    '</div>'
+  );
+  msgs.scrollTop=msgs.scrollHeight;
+  const chatPrompt=CTX+'\n\nUSER QUESTION: '+q+'\n\nRespond concisely (max 200 words) in the same language as the question. Focus on the specific question asked.';
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:400,
+      messages:[{role:'user',content:chatPrompt}]
+    })
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    const text=(d.content&&d.content[0]&&d.content[0].text)||'Error en la respuesta.';
+    const el=document.getElementById(thinkId);
+    if(el){
+      el.innerHTML='<div style="font-size:10px;color:var(--accent);font-weight:500;margin-bottom:4px;">CharterGuard AI</div>'+
+        '<div style="font-size:12px;color:var(--text);line-height:1.55;">'+text+'</div>';
+    }
+    msgs.scrollTop=msgs.scrollHeight;
+  })
+  .catch(e=>{
+    const el=document.getElementById(thinkId);
+    if(el)el.innerHTML='<div style="font-size:10px;color:var(--accent);font-weight:500;margin-bottom:4px;">CharterGuard AI</div>'+
+      '<div style="font-size:12px;color:var(--red);">Error de conexión. Verifica la API key.</div>';
+  });
 }
 
-function addMsg(role,text,id){
-  const con=document.getElementById('chat-msgs');
-  const row=document.createElement('div');
-  row.className='msg-row'+(role==='user'?' user':'');
-  if(id) row.id=id;
-  const ava=document.createElement('div');
-  ava.className='ava '+(role==='user'?'ava-u':'ava-ai');
-  ava.textContent=role==='user'?'U':'AI';
-  const bub=document.createElement('div');
-  bub.className='bubble '+(role==='user'?'bub-u':'bub-ai');
-  bub.textContent=text;
-  row.appendChild(ava); row.appendChild(bub);
-  con.appendChild(row);
-  con.scrollTop=con.scrollHeight;
+function setQ(q){
+  document.getElementById('chatIn').value=q;
+  document.getElementById('chatIn').focus();
+  // Auto scroll to chat
+  document.getElementById('chatMsgs').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
-function updMsg(id,text){
-  const row=document.getElementById(id);
-  if(row) row.querySelector('.bubble').textContent=text;
-}
-
-/* ═══════ TOOLTIP ═══════ */
-function showTip(e,text){
-  const t=document.getElementById('chtip');
-  t.textContent=text; t.style.display='block';
-  t.style.left=(e.clientX+14)+'px'; t.style.top=(e.clientY-34)+'px';
-}
-function hideTip(){ document.getElementById('chtip').style.display='none'; }
-
-/* ═══════ INIT ═══════ */
-document.addEventListener('DOMContentLoaded',()=>{
-  updateChip();
-  runCalc();
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',function(){
+  buildBars();
+  buildNoon();
 });
 </script>
 </body>
