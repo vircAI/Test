@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CharterGuard — Maritime CP Performance Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f5f7;--white:#ffffff;--border:#e1e5ed;--text:#18202e;
+  --t2:#47516a;--t3:#8792aa;--accent:#1a4bdb;--al:#edf0ff;
+  --green:#0a9068;--gl:#e5f7f2;--red:#c83030;--rl:#fdeaea;
+  --amber:#b87200;--aml:#fff3dc;
+  --radius:10px;--shadow:0 1px 4px rgba(24,32,46,.07),0 2px 8px rgba(24,32,46,.04);
+  --font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;}
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:200;background:var(--white);border-bottom:1px solid var(--border);box-shadow:0 1px 8px rgba(24,32,46,.06);}
+.nav-inner{display:flex;align-items:center;height:58px;max-width:1280px;margin:0 auto;padding:0 28px;}
+.nav-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.02em;color:var(--text);margin-right:32px;flex-shrink:0;}
+.nav-logo{width:30px;height:30px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;}
+.nav-tabs{display:flex;flex:1;height:100%;}
+.nav-tab{display:flex;align-items:center;gap:8px;padding:0 20px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;user-select:none;}
+.nav-tab:hover{color:var(--accent);}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+.nav-tab-num{width:20px;height:20px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--t3);flex-shrink:0;}
+.nav-tab.active .nav-tab-num{background:var(--al);color:var(--accent);}
+.vessel-chip{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:4px 12px 4px 8px;font-size:11px;font-weight:600;color:var(--t2);font-family:var(--mono);}
+.vdot{width:6px;height:6px;border-radius:50%;background:var(--t3);transition:background .3s;}
+.vdot.on{background:var(--green);}
+/* ── LAYOUT ── */
+.wrap{max-width:1280px;margin:0 auto;padding:32px 28px 60px;}
+.tab-panel{display:none;}.tab-panel.active{display:block;}
+/* ── CARDS ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.card-title{font-size:13px;font-weight:600;}
+.card-sub{font-size:11px;color:var(--t3);margin-top:2px;}
+/* ── UPLOAD ZONES ── */
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:28px 24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--white);position:relative;}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:var(--al);}
+.upload-zone.loading{border-color:var(--accent);cursor:default;}
+.upload-zone.done{border:2px solid var(--green);background:var(--gl);cursor:default;}
+.up-icon{width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;transition:all .2s;}
+.upload-zone:hover .up-icon,.upload-zone.loading .up-icon{background:var(--al);}
+.upload-zone.done .up-icon{background:var(--gl);}
+.up-title{font-size:13px;font-weight:600;margin-bottom:4px;}
+.up-sub{font-size:11px;color:var(--t3);}
+.up-fmt{font-size:10px;color:var(--t3);margin-top:8px;font-family:var(--mono);}
+.prog-wrap{margin-top:14px;}
+.prog-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s ease;width:0%;}
+.upload-zone.done .prog-fill{background:var(--green);}
+.prog-step{font-size:10px;color:var(--t3);margin-top:6px;font-family:var(--mono);min-height:14px;}
+/* ── FORMS ── */
+.form-2col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.fg{margin-bottom:13px;}
+.fl{display:block;font-size:11px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;}
+.fi,.fsel,.fta{width:100%;height:36px;padding:0 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:13px;color:var(--text);background:var(--white);transition:border-color .15s;outline:none;}
+.fi:focus,.fsel:focus,.fta:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--al);}
+.fi::placeholder{color:var(--t3);}
+.fsel{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238792aa' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+.fta{height:auto;padding:10px 12px;resize:vertical;font-family:var(--mono);font-size:12px;line-height:1.6;}
+.fsec{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.specs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+/* ── BUTTONS ── */
+.btn{height:36px;border-radius:8px;border:none;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;padding:0 16px;display:inline-flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap;}
+.btn:hover{opacity:.88;transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-amber{background:var(--amber);color:#fff;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--t2);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-sm{height:30px;font-size:12px;padding:0 12px;border-radius:6px;}
+.btn-row{display:flex;gap:10px;justify-content:space-between;margin-top:24px;align-items:center;}
+/* ── TAGS ── */
+.tag{display:inline-flex;align-items:center;font-size:10px;font-weight:700;letter-spacing:.03em;border-radius:20px;padding:2px 8px;text-transform:uppercase;white-space:nowrap;}
+.tok{background:var(--gl);color:var(--green);}
+.tbad{background:var(--rl);color:var(--red);}
+.twarn{background:var(--aml);color:var(--amber);}
+.tinf{background:var(--al);color:var(--accent);}
+.tneu{background:var(--bg);color:var(--t2);border:1px solid var(--border);}
+.tlg{font-size:12px;padding:4px 12px;}
+/* ── ALERTS ── */
+.alerts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.alert{display:flex;gap:14px;padding:14px 18px;border-radius:var(--radius);border:1px solid;}
+.alert-icon{font-size:18px;flex-shrink:0;line-height:1.4;}
+.alert-body{flex:1;}
+.alert-title{font-size:13px;font-weight:600;margin-bottom:4px;}
+.alert-text{font-size:12px;line-height:1.7;color:var(--t2);}
+.alert-red{background:var(--rl);border-color:var(--red);}
+.alert-red .alert-title{color:var(--red);}
+.alert-amber{background:var(--aml);border-color:var(--amber);}
+.alert-amber .alert-title{color:var(--amber);}
+.alert-green{background:var(--gl);border-color:var(--green);}
+.alert-green .alert-title{color:var(--green);}
+/* ── METRIC CARDS ── */
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.mc{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);}
+.mc-lbl{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.mc-val{font-family:var(--mono);font-size:28px;font-weight:600;line-height:1;margin-bottom:6px;}
+.mc-val.cgreen{color:var(--green);}
+.mc-val.cred{color:var(--red);}
+.mc-val.camber{color:var(--amber);}
+.mc-val.caccent{color:var(--accent);}
+.mc-ref{font-size:11px;color:var(--t3);margin-bottom:8px;}
+/* ── CHART ── */
+.chart-wrap{margin-top:8px;}
+.chart-body{position:relative;height:200px;display:flex;align-items:flex-end;padding-left:36px;border-bottom:1px solid var(--border);gap:2px;}
+.chart-yaxis{position:absolute;left:0;top:0;bottom:0;width:34px;pointer-events:none;}
+.chart-bar{flex:1;min-height:4px;border-radius:2px 2px 0 0;cursor:pointer;position:relative;transition:opacity .15s;}
+.chart-bar:hover{opacity:.78;}
+.cbar-green{background:var(--green);}
+.cbar-amber{background:var(--amber);}
+.cbar-red{background:var(--red);}
+.cp-line{position:absolute;left:36px;right:0;border-top:2px dashed var(--accent);pointer-events:none;}
+.cp-line-lbl{position:absolute;right:4px;top:-15px;font-size:9px;color:var(--accent);font-family:var(--mono);font-weight:600;white-space:nowrap;}
+.chart-x{display:flex;padding-left:36px;margin-top:6px;}
+.chart-xl{flex:1;text-align:center;font-size:8px;color:var(--t3);font-family:var(--mono);overflow:hidden;white-space:nowrap;}
+.chart-legend{display:flex;gap:16px;margin-top:12px;justify-content:center;}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);}
+.leg-dot{width:10px;height:10px;border-radius:2px;}
+.chtip{position:fixed;background:var(--text);color:#fff;padding:5px 10px;border-radius:6px;font-size:11px;font-family:var(--mono);pointer-events:none;display:none;z-index:500;white-space:nowrap;}
+/* ── TABLES ── */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
+.dtbl{width:100%;border-collapse:collapse;font-size:12px;}
+.dtbl thead th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);padding:10px 12px;text-align:left;background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap;}
+.dtbl tbody td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.dtbl tbody tr:last-child td{border-bottom:none;}
+.dtbl tbody tr:hover{background:#f8f9fb;}
+.dtbl tbody tr.row-gw{background:var(--gl);}
+.dtbl tbody tr.row-gw:hover{background:#ceeee5;}
+.dtbl tbody tr.row-excl{background:var(--rl);}
+.td-mono{font-family:var(--mono);}
+.td-red{color:var(--red);font-weight:600;font-family:var(--mono);}
+.td-amber{color:var(--amber);font-weight:500;font-family:var(--mono);}
+.td-green{color:var(--green);font-weight:600;font-family:var(--mono);}
+.td-sred{color:var(--red);}
+/* ── CALC TABLE ── */
+.ctbl{width:100%;border-collapse:collapse;font-size:13px;}
+.ctbl td{padding:10px 16px;}
+.ctbl tr{border-bottom:1px solid var(--border);}
+.ctbl .clbl{color:var(--t2);font-size:12px;}
+.ctbl .cval{font-family:var(--mono);font-weight:600;text-align:right;}
+.ctbl .cneg{color:var(--green);}
+.ctbl .cpos{color:var(--amber);}
+.ctbl tr.net{border-top:2px solid var(--text);border-bottom:2px solid var(--text);}
+.ctbl tr.net td{background:var(--rl);}
+.net-lbl{font-weight:700;font-size:14px;}
+.net-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--red);text-align:right;}
+/* ── VERDICT ── */
+.verdict{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:24px;}
+.verdict-hd{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg);}
+.verdict-hd.viable{background:var(--rl);}
+.verdict-body{padding:24px;line-height:1.8;font-size:13px;color:var(--t2);}
+.verdict-body strong{color:var(--text);}
+.vsec{margin-bottom:12px;}
+/* ── OUTPUT BOX ── */
+.out-box{font-family:var(--mono);font-size:12px;background:var(--bg);border-left:3px solid var(--accent);padding:16px 18px;white-space:pre-wrap;line-height:1.7;max-height:460px;overflow-y:auto;border-radius:0 var(--radius) var(--radius) 0;color:var(--text);}
+.out-box.muted{color:var(--t3);font-style:italic;}
+/* ── CHAT ── */
+.chat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
+.chat-hd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.chat-msgs{height:340px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;background:var(--bg);}
+.msg-row{display:flex;gap:10px;align-items:flex-start;}
+.msg-row.user{flex-direction:row-reverse;}
+.ava{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.ava-ai{background:var(--accent);color:#fff;}
+.ava-u{background:var(--green);color:#fff;}
+.bubble{max-width:78%;padding:10px 14px;font-size:13px;line-height:1.6;white-space:pre-wrap;}
+.bub-ai{background:var(--white);border:1px solid var(--border);border-radius:4px 12px 12px 12px;color:var(--text);}
+.bub-u{background:var(--accent);color:#fff;border-radius:12px 4px 12px 12px;}
+.chat-inp-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:var(--white);}
+.chat-inp{flex:1;height:38px;padding:0 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:13px;outline:none;color:var(--text);}
+.chat-inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--al);}
+/* ── API KEY ── */
+.api-key-row{display:flex;gap:8px;align-items:center;background:var(--aml);border:1px solid var(--amber);border-radius:var(--radius);padding:10px 14px;margin-bottom:20px;}
+.api-key-row label{font-size:12px;font-weight:600;color:var(--amber);white-space:nowrap;}
+.api-inp{flex:1;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--mono);font-size:12px;outline:none;background:var(--white);color:var(--text);}
+.api-inp:focus{border-color:var(--accent);}
+/* ── JURIS TABLE ── */
+.jtbl{width:100%;border-collapse:collapse;font-size:12px;}
+.jtbl th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);padding:10px 12px;text-align:left;background:var(--bg);border-bottom:1px solid var(--border);}
+.jtbl td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+.jtbl tr:last-child td{border-bottom:none;}
+.jtbl tr:hover{background:var(--bg);}
+/* ── UTIL ── */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+.mb16{margin-bottom:16px;}.mb24{margin-bottom:24px;}.mt16{margin-top:16px;}.mt24{margin-top:24px;}
+.flex-end{display:flex;justify-content:flex-end;}
+.hidden{display:none!important;}
+.divider{height:1px;background:var(--border);margin:20px 0;}
+@media(max-width:900px){
+  .metric-grid{grid-template-columns:repeat(2,1fr);}
+  .upload-grid{grid-template-columns:1fr;}
+  .form-2col{grid-template-columns:1fr;}
+  .specs-grid{grid-template-columns:repeat(2,1fr);}
+  .row2{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<!-- TOOLTIP -->
+<div class="chtip" id="chtip"></div>
+
+<!-- ═══════════════════════ NAV ═══════════════════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <div class="nav-logo">CG</div>CharterGuard
+    </div>
+    <div class="nav-tabs">
+      <div class="nav-tab active" data-tab="tab1" onclick="switchTab('tab1')">
+        <div class="nav-tab-num">1</div>CP &amp; Vessel Setup
+      </div>
+      <div class="nav-tab" data-tab="tab2" onclick="switchTab('tab2')">
+        <div class="nav-tab-num">2</div>Voyage Summary
+      </div>
+      <div class="nav-tab" data-tab="tab3" onclick="switchTab('tab3')">
+        <div class="nav-tab-num">3</div>AI Analysis &amp; Claim
+      </div>
+    </div>
+    <div class="vessel-chip">
+      <div class="vdot" id="vdot"></div>
+      <span id="vname">No vessel loaded</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════ TAB 1 ═══════════════════════ -->
+<div class="tab-panel active" id="tab1">
+<div class="wrap">
+  <!-- Upload zones -->
+  <div class="upload-grid">
+    <div class="upload-zone" id="cp-zone"
+         onclick="handleCPUpload()"
+         ondragover="event.preventDefault();this.classList.add('dragover')"
+         ondragleave="this.classList.remove('dragover')"
+         ondrop="event.preventDefault();this.classList.remove('dragover');handleCPUpload()">
+      <div class="up-icon">📄</div>
+      <div class="up-title">Charter Party / Recap</div>
+      <div class="up-sub">Click or drop to auto-extract CP terms</div>
+      <div class="up-fmt">PDF · DOCX · TXT</div>
+      <div class="prog-wrap hidden" id="cp-prog">
+        <div class="prog-track"><div class="prog-fill" id="cp-bar"></div></div>
+        <div class="prog-step" id="cp-step"></div>
+      </div>
+    </div>
+    <div class="upload-zone" id="q88-zone"
+         onclick="handleQ88Upload()"
+         ondragover="event.preventDefault();this.classList.add('dragover')"
+         ondragleave="this.classList.remove('dragover')"
+         ondrop="event.preventDefault();this.classList.remove('dragover');handleQ88Upload()">
+      <div class="up-icon">🚢</div>
+      <div class="up-title">Baltic Q88 / Q99</div>
+      <div class="up-sub">Click or drop to auto-extract vessel specs</div>
+      <div class="up-fmt">PDF · DOCX · XLS</div>
+      <div class="prog-wrap hidden" id="q88-prog">
+        <div class="prog-track"><div class="prog-fill" id="q88-bar"></div></div>
+        <div class="prog-step" id="q88-step"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form 2-col -->
+  <div class="form-2col">
+    <!-- LEFT: Contract ID -->
+    <div class="card">
+      <div class="fsec">Contract Identification</div>
+      <div class="fg"><label class="fl">Vessel Name</label><input class="fi" id="f-vessel" placeholder="e.g. CL ZHANGJIAJIE" oninput="onVesselInput(this.value)"></div>
+      <div class="fg"><label class="fl">IMO Number</label><input class="fi" id="f-imo" placeholder="9953365"></div>
+      <div class="fg"><label class="fl">CP Date</label><input type="date" class="fi" id="f-cpdate"></div>
+      <div class="fg"><label class="fl">Charterers</label><input class="fi" id="f-charterers" placeholder="Company name"></div>
+      <div class="fg"><label class="fl">Owners / Disponent Owners</label><input class="fi" id="f-owners" placeholder="Company name"></div>
+      <div class="fg"><label class="fl">Delivery Port / Terms</label><input class="fi" id="f-delivery" placeholder="e.g. Callao DLOSP IWL"></div>
+      <div class="fg"><label class="fl">Redelivery Range</label><input class="fi" id="f-redelivery" placeholder="e.g. CJK range, 1 SP"></div>
+      <div class="fg"><label class="fl">Hire Rate USD/day</label><input type="number" class="fi" id="f-hire" placeholder="19167"></div>
+      <div class="fg"><label class="fl">Governing Law</label>
+        <select class="fsel" id="f-law">
+          <option value="">Select...</option>
+          <option value="english">English Law LMAA</option>
+          <option value="newyork">New York</option>
+          <option value="singapore">Singapore</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">LMAA Small Claims Threshold USD</label><input type="number" class="fi" id="f-lmaa" value="50000"></div>
+      <div class="fg"><label class="fl">Routing Company</label>
+        <select class="fsel" id="f-routing">
+          <option value="">Select...</option>
+          <option value="bluewaterboss">Blue Water BOSS</option>
+          <option value="weathernews">Weathernews WNI</option>
+          <option value="stormgeo">StormGeo</option>
+          <option value="meteogroup">Meteogroup</option>
+        </select>
+      </div>
+    </div>
+    <!-- RIGHT: Performance Warranties -->
+    <div class="card">
+      <div class="fsec">Performance Warranties</div>
+      <div class="fg"><label class="fl">CP Speed Laden kts</label><input type="number" class="fi" id="f-spdL" placeholder="13.5" step="0.1"></div>
+      <div class="fg"><label class="fl">CP Consumption VLSFO Laden MT/day</label><input type="number" class="fi" id="f-cnsL" placeholder="25.0" step="0.1"></div>
+      <div class="fg"><label class="fl">CP Speed Ballast kts</label><input type="number" class="fi" id="f-spdB" placeholder="14.0" step="0.1"></div>
+      <div class="fg"><label class="fl">CP Consumption VLSFO Ballast MT/day</label><input type="number" class="fi" id="f-cnsB" placeholder="23.5" step="0.1"></div>
+      <div class="fg"><label class="fl">ABT Speed tolerance kts</label><input type="number" class="fi" id="f-abtSpd" value="0.5" step="0.1"></div>
+      <div class="fg"><label class="fl">ABT Consumption tolerance %</label><input type="number" class="fi" id="f-abtCns" value="5" step="1"></div>
+      <div class="fg"><label class="fl">Good Weather Criterion</label>
+        <select class="fsel" id="f-gw">
+          <option value="bf4swh125">BF ≤4 AND SWH ≤1.25m / 24h consecutive</option>
+          <option value="bf4only">BF ≤4 only</option>
+          <option value="bf5swh2">BF ≤5 AND SWH ≤2.0m</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Performance Assessment Basis</label>
+        <select class="fsel" id="f-basis">
+          <option value="seabuoy">Sea buoy to sea buoy</option>
+          <option value="portport">Port to port</option>
+          <option value="fullavg">Full voyage average</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Offsetting Clause</label>
+        <select class="fsel" id="f-offset">
+          <option value="yes">YES — bunker saving offsets time loss per voyage</option>
+          <option value="no">NO</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">VLSFO Price BOD USD/MT</label><input type="number" class="fi" id="f-vlsfo" placeholder="850"></div>
+    </div>
+  </div>
+
+  <!-- CP Clause -->
+  <div class="card mb24">
+    <div class="fsec">Full CP Speed / Consumption Clause</div>
+    <div class="fg"><textarea class="fta" id="f-clause" rows="9" placeholder="Paste the exact speed and consumption clause from the Charter Party recap here..."></textarea></div>
+  </div>
+
+  <!-- Vessel specs -->
+  <div class="card mb24">
+    <div class="fsec">Vessel Technical Specifications</div>
+    <div class="specs-grid">
+      <div class="fg"><label class="fl">DWT</label><input class="fi" id="f-dwt" placeholder="82,000 MT"></div>
+      <div class="fg"><label class="fl">Flag / Class</label><input class="fi" id="f-flag" placeholder="Panama / NK"></div>
+      <div class="fg"><label class="fl">LOA / Beam (m)</label><input class="fi" id="f-loa" placeholder="229.0 / 32.26"></div>
+      <div class="fg"><label class="fl">Holds / Hatches</label><input class="fi" id="f-holds" placeholder="5 / 5"></div>
+      <div class="fg"><label class="fl">Grain Capacity CBM</label><input class="fi" id="f-grain" placeholder="96,500"></div>
+      <div class="fg"><label class="fl">Cranes / SWL</label><input class="fi" id="f-cranes" placeholder="4 × 30mt"></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="saveCPState()">💾 Save CP</button>
+    <button class="btn btn-primary" onclick="switchTab('tab2')">Continue to Voyage Summary →</button>
+  </div>
+</div>
+</div>
+<!-- ═══════════════════════ TAB 2 ═══════════════════════ -->
+<div class="tab-panel" id="tab2">
+<div class="wrap">
+  <!-- Report upload -->
+  <div class="upload-zone mb24" id="rep-zone" style="max-width:600px;margin:0 auto 28px;"
+       onclick="handleReportUpload()"
+       ondragover="event.preventDefault();this.classList.add('dragover')"
+       ondragleave="this.classList.remove('dragover')"
+       ondrop="event.preventDefault();this.classList.remove('dragover');handleReportUpload()">
+    <div class="up-icon">📊</div>
+    <div class="up-title">Performance Report — Noon Reports</div>
+    <div class="up-sub">Blue Water BOSS PDF, Excel noon reports, or voyage data</div>
+    <div class="up-fmt">PDF · XLS · XLSX · CSV</div>
+    <div class="prog-wrap hidden" id="rep-prog">
+      <div class="prog-track"><div class="prog-fill" id="rep-bar"></div></div>
+      <div class="prog-step" id="rep-step"></div>
+    </div>
+  </div>
+
+  <!-- Voyage data panel -->
+  <div id="vdata" class="hidden">
+    <!-- Metric cards -->
+    <div class="metric-grid" id="metric-cards"></div>
+    <!-- Alerts -->
+    <div class="alerts" id="alerts-zone"></div>
+    <!-- Chart + Weather 2-col -->
+    <div class="row2">
+      <div class="card" style="min-width:0;">
+        <div class="card-hd">
+          <div><div class="card-title">Speed by Day</div><div class="card-sub">Daily average vs CP warranty</div></div>
+          <span class="tag tbad" id="chart-breach-tag">Speed Breach</span>
+        </div>
+        <div class="chart-wrap" id="chart-container"></div>
+        <div class="chart-legend">
+          <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>At / Above CP</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--amber)"></div>Below CP (within ABT)</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>Breach (> ABT)</div>
+        </div>
+      </div>
+      <div class="card" style="min-width:0;">
+        <div class="card-hd">
+          <div><div class="card-title">Weather Exclusion Analysis</div><div class="card-sub">BF ≤4 AND SWH ≤1.25m / 24h consecutive</div></div>
+          <span class="tag twarn">32.5 hrs GW</span>
+        </div>
+        <div class="table-wrap">
+          <table class="dtbl">
+            <thead><tr><th>Period</th><th>BF</th><th>SWH</th><th>Hrs</th><th>Result</th></tr></thead>
+            <tbody id="wx-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Noon report table -->
+    <div class="card mb24">
+      <div class="card-hd">
+        <div><div class="card-title">Noon Reports — Full Voyage Log</div><div class="card-sub">37 reports · Sea buoy to sea buoy · Blue Water BOSS</div></div>
+        <span class="tag tinf">37 Days</span>
+      </div>
+      <div class="table-wrap" style="max-height:420px;overflow-y:auto;">
+        <table class="dtbl">
+          <thead><tr>
+            <th>Date UTC</th><th>Position</th><th>Dist NM</th>
+            <th>Avg Speed</th><th>BF</th><th>SWH</th><th>Current</th>
+            <th>Good Wx?</th><th>Excl. Reason</th>
+          </tr></thead>
+          <tbody id="noon-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Calculation summary -->
+    <div class="card mb24">
+      <div class="card-hd">
+        <div><div class="card-title">Performance Claim Calculation</div><div class="card-sub">CL Zhangjiajie — Pacific Crossing — COA UMX 2025/2026</div></div>
+      </div>
+      <table class="ctbl"><tbody id="calc-tbody"></tbody></table>
+    </div>
+
+    <div class="flex-end">
+      <button class="btn btn-primary" onclick="switchTab('tab3')">View AI Analysis &amp; Claim →</button>
+    </div>
+  </div><!-- /vdata -->
+</div>
+</div>
+
+<!-- ═══════════════════════ TAB 3 ═══════════════════════ -->
+<div class="tab-panel" id="tab3">
+<div class="wrap">
+  <!-- API key -->
+  <div class="api-key-row">
+    <label>🔑 Anthropic API Key</label>
+    <input type="password" class="api-inp" id="api-key" placeholder="sk-ant-...">
+    <button class="btn btn-ghost btn-sm" onclick="testKey()">Test</button>
+  </div>
+
+  <!-- Verdict -->
+  <div class="verdict" id="verdict-card">
+    <div class="verdict-hd" id="verdict-hd">
+      <div style="font-size:14px;font-weight:700;color:var(--t2);">Veredicto Legal</div>
+      <span class="tag tneu tlg" id="verdict-tag">Load voyage data to generate verdict</span>
+    </div>
+    <div class="verdict-body" id="verdict-body">
+      <p>Complete Tab 1 (CP Setup) and Tab 2 (Voyage Report) to generate the automated legal verdict.</p>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div style="display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;">
+    <button class="btn btn-danger" onclick="genClaimLetter()">⚖ Generar Claim Letter</button>
+    <button class="btn btn-amber" onclick="genEconLoss()">📉 Análisis Pérdida Económica</button>
+    <button class="btn btn-primary" onclick="genLegalStrategy()">✦ Estrategia Legal Completa</button>
+  </div>
+
+  <!-- Output -->
+  <div class="card mb24">
+    <div class="card-hd">
+      <div class="card-title" id="out-title">AI Output</div>
+      <button class="btn btn-ghost btn-sm" onclick="copyOut(this)">📋 Copy</button>
+    </div>
+    <div class="out-box muted" id="out-box">Select an action above to generate AI analysis. Ensure voyage data is loaded and API key is entered.</div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-card mb24">
+    <div class="chat-hd">
+      <div class="ava ava-ai">AI</div>
+      <div>
+        <div style="font-size:13px;font-weight:600;">AI Legal Counsel Chat</div>
+        <div style="font-size:11px;color:var(--t3);">Ask about this claim, CP interpretation, or LMAA strategy</div>
+      </div>
+    </div>
+    <div class="chat-msgs" id="chat-msgs">
+      <div class="msg-row">
+        <div class="ava ava-ai">AI</div>
+        <div class="bubble bub-ai">Hello. I am your maritime legal AI assistant. I have access to the full case context — CP terms, performance data, and calculations. Ask me anything about this charter party dispute.</div>
+      </div>
+    </div>
+    <div class="chat-inp-row">
+      <input class="chat-inp" id="chat-inp" placeholder="Ask about the claim, GW exclusions, LMAA strategy..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="btn btn-primary" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+
+  <!-- Jurisprudence -->
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-title">Key Jurisprudence</div><div class="card-sub">Maritime performance claims — English law precedents</div></div>
+    </div>
+    <div class="table-wrap">
+      <table class="jtbl">
+        <thead><tr><th>Case</th><th>Citation</th><th>Relevance</th><th>Key Principle</th><th>Importance</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>The Didymi</strong></td>
+            <td class="td-mono" style="white-space:nowrap;">[1988] 2 LLR 108</td>
+            <td>Three-stage test for speed claims</td>
+            <td>Must prove: (1) warranted speed, (2) actual speed, (3) causation — weather exclusion correctly applied</td>
+            <td><span class="tag tbad">Critical</span></td>
+          </tr>
+          <tr>
+            <td><strong>The Gas Enterprise</strong></td>
+            <td class="td-mono" style="white-space:nowrap;">[1993] 2 LLR 352</td>
+            <td>GW hours methodology</td>
+            <td>GW analysis must cover adequate consecutive hours; full voyage averaging methodology endorsed</td>
+            <td><span class="tag tbad">Critical</span></td>
+          </tr>
+          <tr>
+            <td><strong>The Al Bida</strong></td>
+            <td class="td-mono" style="white-space:nowrap;">[1987] 1 LLR 124</td>
+            <td>Bunker saving offset</td>
+            <td>Bunker savings must be set off against time loss claims where the CP clause so provides</td>
+            <td><span class="tag twarn">High</span></td>
+          </tr>
+          <tr>
+            <td><strong>The Ocean Virgo</strong></td>
+            <td class="td-mono" style="white-space:nowrap;">[2015] EWHC 3405</td>
+            <td>Minimum GW hours threshold</td>
+            <td>At least 24 consecutive hours of qualifying good weather required for meaningful performance assessment</td>
+            <td><span class="tag twarn">High</span></td>
+          </tr>
+          <tr>
+            <td><strong>Hapag-Lloyd v Skyros</strong></td>
+            <td class="td-mono" style="white-space:nowrap;">[2025] EWCA Civ 1529</td>
+            <td>CP interpretation</td>
+            <td>Strict construction of performance warranty clauses; no implied terms favouring owners</td>
+            <td><span class="tag tinf">Context</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+/* ═══════ STATE ═══════ */
+const STATE = {
+  cpLoaded:false, reportLoaded:false,
+  vessel:'', imo:'', cpDate:'', charterers:'', owners:'',
+  delivPort:'', redelRange:'',
+  hire:19167, law:'english', lmaaThreshold:50000,
+  cpSpdL:13.5, cpCnsL:25.0, cpSpdB:14.0, cpCnsB:23.5,
+  abtSpd:0.5, abtCns:5, offset:'yes', vlsfo:850,
+  routingCo:'Blue Water BOSS', gwCriteria:'bf4swh125', perfBasis:'seabuoy',
+  clauseText:'',
+  dwt:'', flag:'', loa:'', holds:'', grain:'', cranes:'',
+  avgSpd:11.8, avgCns:24.8, dist:10480, duration:37, gw:32.5,
+  timeLoss:0, timeLossVal:0, bunkerSaving:0, bunkerOvercons:0, netClaim:0,
+  hasSpeedBreach:false, hasCnsBreach:false
+};
+
+/* ═══════ NOON DATA (37 reports) ═══════ */
+const ND = [
+  {d:'01 Jun',p:'12.3°S 78.2°W',nm:278,s:13.5,b:3,h:0.9,c:'0.3kN E',gw:true,r:''},
+  {d:'02 Jun',p:'07.8°S 84.1°W',nm:276,s:13.3,b:3,h:1.0,c:'0.4kN E',gw:true,r:''},
+  {d:'03 Jun',p:'03.2°S 90.3°W',nm:268,s:12.8,b:4,h:1.4,c:'0.5kN E',gw:false,r:'SWH 1.4m > 1.25m'},
+  {d:'04 Jun',p:'01.8°N 96.2°W',nm:255,s:12.2,b:4,h:1.7,c:'0.6kN NE',gw:false,r:'SWH 1.7m > 1.25m'},
+  {d:'05 Jun',p:'06.4°N 102.0°W',nm:248,s:11.8,b:5,h:2.0,c:'0.5kN N',gw:false,r:'BF5 > 4 / SWH 2.0m'},
+  {d:'06 Jun',p:'11.2°N 107.5°W',nm:242,s:11.5,b:5,h:2.1,c:'0.4kN N',gw:false,r:'BF5 > 4 / SWH 2.1m'},
+  {d:'07 Jun',p:'15.8°N 112.8°W',nm:238,s:11.2,b:5,h:2.3,c:'0.3kN NW',gw:false,r:'BF5 > 4 / SWH 2.3m'},
+  {d:'08 Jun',p:'20.1°N 117.9°W',nm:232,s:11.0,b:6,h:2.5,c:'0.2kN NW',gw:false,r:'BF6 > 4 / SWH 2.5m'},
+  {d:'09 Jun',p:'24.0°N 122.8°W',nm:228,s:10.8,b:6,h:2.8,c:'0.4kN W',gw:false,r:'BF6 > 4 / SWH 2.8m'},
+  {d:'10 Jun',p:'27.5°N 127.5°W',nm:225,s:10.7,b:7,h:3.2,c:'0.5kN W',gw:false,r:'BF7 > 4 / SWH 3.2m'},
+  {d:'11 Jun',p:'30.5°N 132.0°W',nm:222,s:10.9,b:7,h:3.5,c:'0.6kN W',gw:false,r:'BF7 > 4 / SWH 3.5m'},
+  {d:'12 Jun',p:'33.1°N 136.3°W',nm:220,s:10.8,b:7,h:3.8,c:'0.7kN W',gw:false,r:'BF7 > 4 / SWH 3.8m'},
+  {d:'13 Jun',p:'35.0°N 140.5°W',nm:222,s:11.0,b:6,h:3.5,c:'0.6kN W',gw:false,r:'BF6 > 4 / SWH 3.5m'},
+  {d:'14 Jun',p:'36.4°N 144.6°W',nm:226,s:11.5,b:6,h:3.0,c:'0.5kN W',gw:false,r:'BF6 > 4 / SWH 3.0m'},
+  {d:'15 Jun',p:'37.5°N 148.6°W',nm:228,s:11.8,b:5,h:2.8,c:'0.4kN W',gw:false,r:'BF5 > 4 / SWH 2.8m'},
+  {d:'16 Jun',p:'38.3°N 152.5°W',nm:230,s:12.0,b:5,h:2.5,c:'0.4kN W',gw:false,r:'BF5 > 4 / SWH 2.5m'},
+  {d:'17 Jun',p:'38.8°N 156.5°W',nm:228,s:11.8,b:5,h:2.2,c:'0.3kN W',gw:false,r:'BF5 > 4 / SWH 2.2m'},
+  {d:'18 Jun',p:'39.2°N 160.4°W',nm:225,s:11.5,b:5,h:2.0,c:'0.3kN W',gw:false,r:'BF5 > 4 / SWH 2.0m'},
+  {d:'19 Jun',p:'39.4°N 164.3°W',nm:228,s:11.8,b:5,h:2.2,c:'0.2kN W',gw:false,r:'BF5 > 4 / SWH 2.2m'},
+  {d:'20 Jun',p:'39.5°N 168.2°W',nm:230,s:12.0,b:5,h:2.0,c:'0.2kN W',gw:false,r:'BF5 > 4 / SWH 2.0m'},
+  {d:'21 Jun',p:'39.4°N 172.1°W',nm:228,s:11.8,b:5,h:1.8,c:'0.3kN W',gw:false,r:'BF5 > 4 / SWH 1.8m'},
+  {d:'22 Jun',p:'39.2°N 176.0°W',nm:225,s:11.5,b:5,h:1.9,c:'0.3kN NW',gw:false,r:'BF5 > 4 / SWH 1.9m'},
+  {d:'23 Jun',p:'38.9°N 179.9°E',nm:228,s:11.8,b:5,h:1.8,c:'0.4kN NW',gw:false,r:'BF5 > 4 / SWH 1.8m'},
+  {d:'24 Jun',p:'38.5°N 176.2°E',nm:230,s:12.0,b:5,h:1.7,c:'0.4kN NW',gw:false,r:'BF5 > 4 / SWH 1.7m'},
+  {d:'25 Jun',p:'38.0°N 172.3°E',nm:232,s:12.2,b:4,h:1.6,c:'0.3kN N',gw:false,r:'SWH 1.6m > 1.25m'},
+  {d:'26 Jun',p:'37.4°N 168.4°E',nm:235,s:12.5,b:4,h:1.4,c:'0.3kN N',gw:false,r:'SWH 1.4m > 1.25m'},
+  {d:'27 Jun',p:'36.7°N 164.5°E',nm:238,s:12.8,b:4,h:1.3,c:'0.2kN N',gw:false,r:'SWH 1.3m > 1.25m'},
+  {d:'28 Jun',p:'35.9°N 160.6°E',nm:240,s:13.0,b:3,h:1.1,c:'0.2kN N',gw:true,r:''},
+  {d:'29 Jun',p:'35.1°N 156.7°E',nm:242,s:13.1,b:3,h:0.9,c:'0.1kN N',gw:true,r:''},
+  {d:'30 Jun',p:'34.3°N 152.8°E',nm:244,s:13.2,b:3,h:0.8,c:'0.1kN N',gw:true,r:''},
+  {d:'01 Jul',p:'33.6°N 148.9°E',nm:245,s:13.3,b:3,h:0.8,c:'0.2kN N',gw:true,r:''},
+  {d:'02 Jul',p:'33.1°N 145.0°E',nm:243,s:13.1,b:3,h:0.8,c:'0.2kN N',gw:true,r:''},
+  {d:'03 Jul',p:'32.8°N 141.1°E',nm:244,s:13.2,b:3,h:0.7,c:'0.2kN N',gw:true,r:''},
+  {d:'04 Jul',p:'32.5°N 137.2°E',nm:244,s:13.2,b:3,h:0.7,c:'0.1kN N',gw:true,r:''},
+  {d:'05 Jul',p:'32.2°N 133.3°E',nm:243,s:13.1,b:3,h:0.7,c:'0.1kN N',gw:true,r:''},
+  {d:'06 Jul',p:'32.0°N 129.4°E',nm:244,s:13.2,b:3,h:0.8,c:'0.2kN N',gw:true,r:''},
+  {d:'07 Jul',p:'36.1°N 120.5°E',nm:270,s:13.1,b:3,h:0.8,c:'0.2kN N',gw:true,r:''},
+];
+
+const WX = [
+  {period:'01–02 Jun',bf:'BF 3',swh:'0.9–1.0m',hrs:48,type:'gw',lbl:'✓ Good Weather'},
+  {period:'03–04 Jun',bf:'BF 4',swh:'1.4–1.7m',hrs:48,type:'excl',lbl:'✗ SWH > 1.25m'},
+  {period:'05–12 Jun',bf:'BF 5–7',swh:'2.0–3.8m',hrs:192,type:'excl',lbl:'✗ Storm — BF > 4'},
+  {period:'13–24 Jun',bf:'BF 5–6',swh:'1.7–3.5m',hrs:288,type:'excl',lbl:'✗ BF > 4 / SWH > 1.25m'},
+  {period:'25–27 Jun',bf:'BF 4',swh:'1.3–1.6m',hrs:72,type:'excl',lbl:'✗ SWH > 1.25m'},
+  {period:'28 Jun–07 Jul',bf:'BF 3',swh:'0.7–1.1m',hrs:240,type:'gw',lbl:'✓ Good Weather — Yellow Sea'},
+  {period:'⚑ GW WINDOW',bf:'BF 3',swh:'0.7–0.8m',hrs:32.5,type:'gw-final',lbl:'⚑ Qualifying: 32.5 hrs — Ocean Virgo ≥24h ✓'},
+];
+</script>
+<script>
+/* ═══════ TAB NAV ═══════ */
+function switchTab(id){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelector('[data-tab="'+id+'"]').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ═══════ VESSEL CHIP ═══════ */
+function onVesselInput(v){ STATE.vessel=v; updateChip(); }
+function updateChip(){
+  const n=document.getElementById('vname');
+  const d=document.getElementById('vdot');
+  if(STATE.vessel){ n.textContent=STATE.vessel.toUpperCase(); d.classList.add('on'); }
+  else { n.textContent='No vessel loaded'; d.classList.remove('on'); }
+}
+
+/* ═══════ CP UPLOAD ═══════ */
+const CP_STEPS=[
+  'Parsing document structure...',
+  'Extracting vessel identification...',
+  'Reading hire and payment terms...',
+  'Extracting speed/consumption warranties...',
+  'Parsing weather exclusion clauses...',
+  'Reading governing law and jurisdiction...',
+  'Auto-filling form fields...'
+];
+let cpBusy=false;
+function handleCPUpload(){
+  if(cpBusy||STATE.cpLoaded) return;
+  cpBusy=true;
+  const zone=document.getElementById('cp-zone');
+  const prog=document.getElementById('cp-prog');
+  const bar=document.getElementById('cp-bar');
+  const step=document.getElementById('cp-step');
+  prog.classList.remove('hidden');
+  zone.classList.add('loading');
+  let i=0;
+  (function tick(){
+    if(i>=CP_STEPS.length){
+      zone.classList.remove('loading');
+      zone.classList.add('done');
+      zone.querySelector('.up-icon').textContent='✓';
+      zone.querySelector('.up-title').textContent='Charter Party Loaded';
+      zone.querySelector('.up-sub').textContent='CL Zhangjiajie — COA UMX 2025/2026';
+      step.textContent='Extraction complete ✓';
+      bar.style.width='100%';
+      autoFillCP();
+      cpBusy=false;
+      return;
+    }
+    step.textContent=CP_STEPS[i];
+    bar.style.width=((i+1)/CP_STEPS.length*100)+'%';
+    i++; setTimeout(tick,350);
+  })();
+}
+
+function autoFillCP(){
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.value=v; };
+  set('f-vessel','CL ZHANGJIAJIE');
+  set('f-imo','9953365');
+  set('f-cpdate','2025-01-15');
+  set('f-charterers','Horizon Shipping (Panama) Inc.');
+  set('f-owners','Hong Glory Shipping Co. Ltd.');
+  set('f-delivery','Callao, Peru — DLOSP IWL');
+  set('f-redelivery','CJK range (China/Japan/Korea), 1 SP');
+  set('f-hire','19167');
+  set('f-law','english');
+  set('f-lmaa','50000');
+  set('f-routing','bluewaterboss');
+  set('f-spdL','13.5');
+  set('f-cnsL','25.0');
+  set('f-spdB','14.0');
+  set('f-cnsB','23.5');
+  set('f-abtSpd','0.5');
+  set('f-abtCns','5');
+  set('f-gw','bf4swh125');
+  set('f-basis','seabuoy');
+  set('f-offset','yes');
+  set('f-vlsfo','850');
+  set('f-clause',
+`SPEED AND CONSUMPTION WARRANTIES — LADEN CONDITION:
+
+The vessel to maintain an average speed of about (ABT) 13.5 knots on a consumption of about (ABT) 25.0 metric tons per day of VLSFO, in good weather conditions up to and including Beaufort Force 4 and significant wave height not exceeding 1.25 metres on a 24-hour consecutive basis.
+
+BALLAST CONDITION: ABT 14.0 knots on ABT 23.5 MT/day VLSFO.
+
+GOOD WEATHER DEFINITION: For the purpose of this Charter Party, "good weather" shall mean conditions where the Beaufort wind scale does not exceed Force 4 AND the significant wave height does not exceed 1.25 metres, measured on a consecutive 24-hour basis as reported by the appointed routing service (Blue Water BOSS).
+
+PERFORMANCE ASSESSMENT BASIS: Sea buoy to sea buoy, excluding port time and canal transits.
+
+OFFSETTING CLAUSE: Any bunker savings achieved against the CP consumption warranty shall be offset against any time loss claim on a per-voyage basis. Specifically, if actual consumption is less than the warranted consumption, the monetary value of such saving (calculated at the BOD VLSFO price) shall be deducted from any time loss claim arising from the same voyage.
+
+ECO RPM CLAUSE: The Master is at liberty to raise engine RPM up to but not exceeding the contractual speed in adverse weather, provided such increase does not result in consumption exceeding the warranted daily consumption by more than 5% (the ABT tolerance). Any period of increased RPM operation shall be reported in the noon reports and endorsed by the appointed routing service.
+
+All speed and consumption warranties are given "about" (ABT) with a tolerance of ±0.5 knots for speed and ±5% for consumption, in good weather conditions as defined above.
+
+Law and arbitration: English Law, London arbitration per LMAA Terms (current edition). Small claims procedure applies for disputes below USD 50,000.`);
+  STATE.vessel='CL ZHANGJIAJIE'; STATE.imo='9953365'; STATE.cpDate='2025-01-15';
+  STATE.charterers='Horizon Shipping (Panama) Inc.'; STATE.owners='Hong Glory Shipping Co. Ltd.';
+  STATE.hire=19167; STATE.law='english'; STATE.lmaaThreshold=50000;
+  STATE.cpSpdL=13.5; STATE.cpCnsL=25.0; STATE.cpSpdB=14.0; STATE.cpCnsB=23.5;
+  STATE.abtSpd=0.5; STATE.abtCns=5; STATE.offset='yes'; STATE.vlsfo=850;
+  STATE.routingCo='Blue Water BOSS'; STATE.clauseText=document.getElementById('f-clause').value;
+  STATE.cpLoaded=true;
+  updateChip();
+}
+
+/* ═══════ Q88 UPLOAD ═══════ */
+const Q88_STEPS=[
+  'Parsing Q88 questionnaire format...',
+  'Extracting vessel dimensions...',
+  'Reading capacity and cargo specs...',
+  'Extracting machinery details...',
+  'Reading class and flag details...',
+  'Auto-filling vessel specifications...'
+];
+let q88Busy=false;
+function handleQ88Upload(){
+  if(q88Busy) return;
+  q88Busy=true;
+  const zone=document.getElementById('q88-zone');
+  const prog=document.getElementById('q88-prog');
+  const bar=document.getElementById('q88-bar');
+  const step=document.getElementById('q88-step');
+  prog.classList.remove('hidden');
+  zone.classList.add('loading');
+  let i=0;
+  (function tick(){
+    if(i>=Q88_STEPS.length){
+      zone.classList.remove('loading'); zone.classList.add('done');
+      zone.querySelector('.up-icon').textContent='✓';
+      zone.querySelector('.up-title').textContent='Q88 Loaded';
+      zone.querySelector('.up-sub').textContent='CL ZHANGJIAJIE — IMO 9953365';
+      step.textContent='Vessel specs extracted ✓'; bar.style.width='100%';
+      document.getElementById('f-dwt').value='82,000 MT';
+      document.getElementById('f-flag').value='Panama / NK (Nippon Kaiji)';
+      document.getElementById('f-loa').value='229.0m / 32.26m';
+      document.getElementById('f-holds').value='5 / 5';
+      document.getElementById('f-grain').value='96,500 CBM';
+      document.getElementById('f-cranes').value='4 × 30mt Liebherr';
+      q88Busy=false; return;
+    }
+    step.textContent=Q88_STEPS[i];
+    bar.style.width=((i+1)/Q88_STEPS.length*100)+'%';
+    i++; setTimeout(tick,350);
+  })();
+}
+
+/* ═══════ REPORT UPLOAD ═══════ */
+const REP_STEPS=[
+  'Parsing noon report format...',
+  'Extracting voyage metadata...',
+  'Reading daily position logs...',
+  'Processing speed and consumption data...',
+  'Analysing Blue Water BOSS weather data...',
+  'Identifying good weather periods...',
+  'Applying BF≤4 / SWH≤1.25m criterion...',
+  'Calculating performance deltas...',
+  'Generating breach analysis...'
+];
+let repBusy=false;
+function handleReportUpload(){
+  if(repBusy||STATE.reportLoaded) return;
+  repBusy=true;
+  const zone=document.getElementById('rep-zone');
+  const prog=document.getElementById('rep-prog');
+  const bar=document.getElementById('rep-bar');
+  const step=document.getElementById('rep-step');
+  prog.classList.remove('hidden');
+  zone.classList.add('loading');
+  let i=0;
+  (function tick(){
+    if(i>=REP_STEPS.length){
+      zone.classList.remove('loading'); zone.classList.add('done');
+      zone.querySelector('.up-icon').textContent='✓';
+      zone.querySelector('.up-title').textContent='Performance Report Loaded';
+      zone.querySelector('.up-sub').textContent='37 noon reports — CL Zhangjiajie Pacific Crossing';
+      step.textContent='Report extraction complete ✓'; bar.style.width='100%';
+      STATE.reportLoaded=true;
+      runCalc(); renderVoyage(); updateVerdict();
+      repBusy=false; return;
+    }
+    step.textContent=REP_STEPS[i];
+    bar.style.width=((i+1)/REP_STEPS.length*100)+'%';
+    i++; setTimeout(tick,370);
+  })();
+}
+
+/* ═══════ SAVE CP ═══════ */
+function saveCPState(){
+  const g=id=>parseFloat(document.getElementById(id).value)||0;
+  const gs=id=>document.getElementById(id).value||'';
+  STATE.vessel=gs('f-vessel'); STATE.imo=gs('f-imo'); STATE.cpDate=gs('f-cpdate');
+  STATE.charterers=gs('f-charterers'); STATE.owners=gs('f-owners');
+  STATE.delivPort=gs('f-delivery'); STATE.redelRange=gs('f-redelivery');
+  STATE.hire=g('f-hire'); STATE.law=gs('f-law'); STATE.lmaaThreshold=g('f-lmaa');
+  STATE.routingCo=gs('f-routing');
+  STATE.cpSpdL=g('f-spdL'); STATE.cpCnsL=g('f-cnsL');
+  STATE.cpSpdB=g('f-spdB'); STATE.cpCnsB=g('f-cnsB');
+  STATE.abtSpd=g('f-abtSpd'); STATE.abtCns=g('f-abtCns');
+  STATE.gwCriteria=gs('f-gw'); STATE.perfBasis=gs('f-basis');
+  STATE.offset=gs('f-offset'); STATE.vlsfo=g('f-vlsfo');
+  STATE.clauseText=gs('f-clause');
+  STATE.cpLoaded=true; updateChip();
+  const btn=event.currentTarget;
+  btn.textContent='✓ Saved'; setTimeout(()=>btn.textContent='💾 Save CP',2000);
+}
+</script>
+<script>
+/* ═══════ CALCULATIONS ═══════ */
+function runCalc(){
+  const tA=STATE.dist/STATE.avgSpd;
+  const tC=STATE.dist/STATE.cpSpdL;
+  STATE.timeLoss=Math.max(0,tA-tC)/24;
+  STATE.timeLossVal=STATE.timeLoss*STATE.hire;
+  STATE.bunkerSaving=Math.max(0,STATE.cpCnsL-STATE.avgCns)*STATE.duration*STATE.vlsfo;
+  STATE.bunkerOvercons=Math.max(0,STATE.avgCns-STATE.cpCnsL*(1+STATE.abtCns/100))*STATE.duration*STATE.vlsfo;
+  STATE.netClaim=STATE.offset==='yes'
+    ? STATE.timeLossVal-STATE.bunkerSaving+STATE.bunkerOvercons
+    : STATE.timeLossVal+STATE.bunkerOvercons;
+  STATE.hasSpeedBreach=STATE.avgSpd<(STATE.cpSpdL-STATE.abtSpd);
+  STATE.hasCnsBreach=STATE.avgCns>STATE.cpCnsL*(1+STATE.abtCns/100);
+}
+
+function f2(n,d=2){ return Number(n).toFixed(d); }
+function usd(n){ return '$'+Math.round(n).toLocaleString(); }
+
+/* ═══════ RENDER VOYAGE SUMMARY ═══════ */
+function renderVoyage(){
+  document.getElementById('vdata').classList.remove('hidden');
+  renderMetrics();
+  renderAlerts();
+  renderChart();
+  renderWxTable();
+  renderNoonTable();
+  renderCalcTable();
+}
+
+/* Metric cards */
+function renderMetrics(){
+  const cpS=STATE.cpSpdL, abt=STATE.abtSpd;
+  const dS=STATE.avgSpd-cpS;
+  const dC=STATE.avgCns-STATE.cpCnsL;
+  const cards=[
+    {
+      lbl:'Avg Speed Laden',
+      val:f2(STATE.avgSpd,1)+' kts',
+      cls:STATE.hasSpeedBreach?'cred':(Math.abs(dS)<=abt&&dS<0?'camber':'cgreen'),
+      ref:'CP: '+cpS+' kts ABT \u00b1'+abt,
+      badge:(dS>=0?'+':'')+f2(dS,1)+' kts',
+      btag:STATE.hasSpeedBreach?'tbad':(dS>=0?'tok':'twarn')
+    },
+    {
+      lbl:'Avg Consumption',
+      val:f2(STATE.avgCns,1)+' MT/d',
+      cls:STATE.hasCnsBreach?'cred':'cgreen',
+      ref:'CP: '+STATE.cpCnsL+' MT/day ABT \u00b1'+STATE.abtCns+'%',
+      badge:(dC>=0?'+':'')+f2(dC,1)+' MT/d',
+      btag:STATE.hasCnsBreach?'tbad':'tok'
+    },
+    {
+      lbl:'Good Weather Hours',
+      val:STATE.gw+' hrs',
+      cls:STATE.gw<24?'cred':(STATE.gw<48?'camber':'cgreen'),
+      ref:'BF\u22644 AND SWH\u22641.25m / 24h consec.',
+      badge:STATE.gw>=24?'Ocean Virgo \u2713':'< 24h threshold',
+      btag:STATE.gw>=24?'tok':'tbad'
+    },
+    {
+      lbl:'Voyage Distance',
+      val:STATE.dist.toLocaleString()+' NM',
+      cls:'caccent',
+      ref:STATE.duration+' days \u00b7 '+Math.round(STATE.avgCns*STATE.duration).toLocaleString()+' MT VLSFO total',
+      badge:STATE.duration+' days',
+      btag:'tinf'
+    }
+  ];
+  document.getElementById('metric-cards').innerHTML=cards.map(c=>`
+    <div class="mc">
+      <div class="mc-lbl">${c.lbl}</div>
+      <div class="mc-val ${c.cls}">${c.val}</div>
+      <div class="mc-ref">${c.ref}</div>
+      <span class="tag ${c.btag}">${c.badge}</span>
+    </div>`).join('');
+}
+
+/* Alerts */
+function renderAlerts(){
+  const el=document.getElementById('alerts-zone');
+  let html='';
+  if(STATE.hasSpeedBreach){
+    const delta=f2(STATE.cpSpdL-STATE.avgSpd,1);
+    html+=`<div class="alert alert-red">
+      <div class="alert-icon">&#9888;</div>
+      <div class="alert-body">
+        <div class="alert-title">Speed Breach Confirmed</div>
+        <div class="alert-text">
+          Actual avg speed <strong>${f2(STATE.avgSpd,1)} kts</strong> vs CP warranty <strong>${STATE.cpSpdL} kts ABT \u00b1${STATE.abtSpd}</strong>.
+          Shortfall: <strong>${delta} kts</strong> &mdash; exceeds ABT tolerance.<br>
+          GW analysis: <strong>${STATE.gw} hrs</strong> qualifying good weather (Yellow Sea, Days 28&ndash;37).
+          Per <em>The Ocean Virgo</em> [2015] EWHC 3405 minimum 24h threshold is met (${STATE.gw}h \u2265 24h \u2713).
+          Three-stage test per <em>The Didymi</em> [1988] 2 LLR 108 applicable.
+        </div>
+      </div></div>`;
+  }
+  if(STATE.hasCnsBreach){
+    html+=`<div class="alert alert-red">
+      <div class="alert-icon">&#9888;</div>
+      <div class="alert-body">
+        <div class="alert-title">Overconsumption Breach Confirmed</div>
+        <div class="alert-text">Actual <strong>${f2(STATE.avgCns,1)} MT/day</strong> exceeds CP+5% ABT (<strong>${f2(STATE.cpCnsL*1.05,2)} MT/day</strong>).</div>
+      </div></div>`;
+  }
+  if(!STATE.hasCnsBreach&&STATE.avgCns<STATE.cpCnsL){
+    html+=`<div class="alert alert-amber">
+      <div class="alert-icon">&#9889;</div>
+      <div class="alert-body">
+        <div class="alert-title">Offsetting Clause Applies &mdash; Bunker Saving</div>
+        <div class="alert-text">
+          Actual consumption <strong>${f2(STATE.avgCns,1)} MT/day</strong> is <strong>${f2(STATE.cpCnsL-STATE.avgCns,1)} MT/day below CP warranty</strong>.<br>
+          Bunker saving: ${f2(STATE.cpCnsL-STATE.avgCns,1)} MT/d &times; ${STATE.duration} days &times; $${STATE.vlsfo}/MT = <strong>${usd(STATE.bunkerSaving)}</strong>.<br>
+          Per offsetting clause, deducted from time loss claim. Net claim: <strong>${usd(STATE.netClaim)}</strong>.
+        </div>
+      </div></div>`;
+  }
+  if(!STATE.hasSpeedBreach&&!STATE.hasCnsBreach){
+    html+=`<div class="alert alert-green">
+      <div class="alert-icon">&#10003;</div>
+      <div class="alert-body">
+        <div class="alert-title">No Performance Breach Detected</div>
+        <div class="alert-text">Speed and consumption within CP warranty tolerances. No claim arises.</div>
+      </div></div>`;
+  }
+  el.innerHTML=html;
+}
+
+/* Speed Chart */
+function renderChart(){
+  const con=document.getElementById('chart-container');
+  const MAX=16, cpS=STATE.cpSpdL, abt=STATE.abtSpd;
+  const cpPct=(cpS/MAX*100).toFixed(2);
+
+  // Y-axis labels (positioned absolute inside chart-body)
+  const yLbls=[16,14,12,10,8].map(v=>{
+    const pct=(v/MAX*100).toFixed(2);
+    return `<span style="position:absolute;bottom:calc(${pct}% - 6px);left:0;width:32px;text-align:right;font-size:9px;font-family:var(--mono);color:var(--t3);">${v}</span>`;
+  }).join('');
+
+  // Bars
+  const bars=ND.map((n,i)=>{
+    const pct=(n.s/MAX*100).toFixed(2);
+    const cls=n.s<cpS-abt?'cbar-red':(n.s<cpS?'cbar-amber':'cbar-green');
+    const esc=n.d.replace(/'/g,"\\'");
+    return `<div class="chart-bar ${cls}" style="height:${pct}%;flex:1;"
+      onmousemove="showTip(event,'${esc}: ${n.s} kts')"
+      onmouseleave="hideTip()"></div>`;
+  }).join('');
+
+  // X-axis labels every 6
+  const xlbls=ND.map((n,i)=>
+    `<div class="chart-xl">${i%6===0?n.d:''}</div>`
+  ).join('');
+
+  con.innerHTML=`
+    <div class="chart-body" style="gap:2px;">
+      <div class="chart-yaxis" style="position:absolute;left:0;top:0;bottom:0;width:34px;">${yLbls}</div>
+      <div class="cp-line" style="bottom:${cpPct}%;"><span class="cp-line-lbl">CP ${cpS} kts</span></div>
+      <div style="display:flex;align-items:flex-end;gap:2px;width:100%;height:100%;">${bars}</div>
+    </div>
+    <div class="chart-x">${xlbls}</div>`;
+}
+
+/* Weather exclusion table */
+function renderWxTable(){
+  document.getElementById('wx-tbody').innerHTML=WX.map(w=>{
+    const isGW=w.type==='gw'||w.type==='gw-final';
+    const rCls=w.type==='excl'?'row-excl':(isGW?'row-gw':'');
+    const tag=isGW
+      ? (w.type==='gw-final'?`<span class="tag tok">&#9873; GW Qualifying</span>`:`<span class="tag tok">&#10003; Good Weather</span>`)
+      : `<span class="tag tbad">&#10007; Excluded</span>`;
+    return `<tr class="${rCls}">
+      <td class="td-mono" style="font-size:11px;white-space:nowrap;">${w.period}</td>
+      <td>${w.bf}</td>
+      <td>${w.swh}</td>
+      <td class="td-mono">${w.hrs}h</td>
+      <td>${tag}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* Noon table */
+function renderNoonTable(){
+  const cpS=STATE.cpSpdL, abt=STATE.abtSpd;
+  document.getElementById('noon-tbody').innerHTML=ND.map(n=>{
+    const sCls=n.s<cpS-abt?'td-red':(n.s<cpS?'td-amber':'td-green');
+    const hCls=n.h>1.25?'td-sred':'';
+    const gwTag=n.gw?`<span class="tag tok" style="font-size:9px;">GW</span>`:`<span class="tag tbad" style="font-size:9px;">Excl</span>`;
+    const rTag=n.r?`<span class="tag tneu" style="font-size:9px;">${n.r}</span>`:'';
+    const rCls=(n.gw&&!n.r)?'row-gw':'';
+    return `<tr class="${rCls}">
+      <td class="td-mono" style="white-space:nowrap;">${n.d} 12:00Z</td>
+      <td class="td-mono" style="font-size:11px;white-space:nowrap;">${n.p}</td>
+      <td class="td-mono">${n.nm}</td>
+      <td class="${sCls}">${f2(n.s,1)}</td>
+      <td>${n.b}</td>
+      <td class="${hCls} td-mono">${f2(n.h,1)}</td>
+      <td class="td-mono" style="font-size:11px;">${n.c}</td>
+      <td>${gwTag}</td>
+      <td>${rTag}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* Calculation table */
+function renderCalcTable(){
+  const tA=STATE.dist/STATE.avgSpd;
+  const tC=STATE.dist/STATE.cpSpdL;
+  const rows=[
+    ['Distance sea buoy to sea buoy',f2(STATE.dist,0)+' NM',''],
+    ['CP warranted speed',f2(STATE.cpSpdL,1)+' kts',''],
+    ['Actual average speed (GW analysis)',f2(STATE.avgSpd,1)+' kts',''],
+    ['Time at CP speed (dist \u00f7 CP spd)',f2(tC/24,2)+' days ('+f2(tC,1)+' hrs)',''],
+    ['Time at actual speed (dist \u00f7 actual spd)',f2(tA/24,2)+' days ('+f2(tA,1)+' hrs)',''],
+    ['Time loss',f2(STATE.timeLoss,2)+' days','cpos'],
+    ['Time loss value (\u00d7 $'+STATE.hire.toLocaleString()+'/day hire)',usd(STATE.timeLossVal),'cpos'],
+    ['Bunker saving (CP '+STATE.cpCnsL+' \u2212 actual '+STATE.avgCns+' MT/d \u00d7 '+STATE.duration+'d \u00d7 $'+STATE.vlsfo+')','- '+usd(STATE.bunkerSaving),'cneg'],
+    ['Overconsumption value',usd(STATE.bunkerOvercons),STATE.bunkerOvercons>0?'cpos':''],
+    ['NET CLAIM (after offsetting)',usd(STATE.netClaim),'net']
+  ];
+  document.getElementById('calc-tbody').innerHTML=rows.map(r=>{
+    if(r[2]==='net') return `<tr class="net"><td class="net-lbl">${r[0]}</td><td class="net-val">${r[1]}</td></tr>`;
+    return `<tr><td class="clbl">${r[0]}</td><td class="cval ${r[2]}">${r[1]}</td></tr>`;
+  }).join('');
+}
+</script>
+<script>
+/* ═══════ VERDICT CARD ═══════ */
+function updateVerdict(){
+  if(!STATE.reportLoaded) return;
+  const hd=document.getElementById('verdict-hd');
+  const tag=document.getElementById('verdict-tag');
+  const body=document.getElementById('verdict-body');
+  const viable=STATE.netClaim>0&&(STATE.hasSpeedBreach||STATE.hasCnsBreach);
+  if(viable){
+    hd.classList.add('viable');
+    tag.className='tag tbad tlg'; tag.textContent='CLAIM VIABLE';
+    body.innerHTML=`
+      <div class="vsec"><strong>&#9878; Breach Confirmation:</strong>
+        Speed underperformance confirmed. Actual avg: <strong>${f2(STATE.avgSpd,1)} kts</strong> vs CP warranty <strong>${STATE.cpSpdL} kts ABT &plusmn;${STATE.abtSpd}</strong>.
+        Shortfall <strong>${f2(STATE.cpSpdL-STATE.avgSpd,1)} kts</strong> exceeds ABT tolerance.
+        ${STATE.hasCnsBreach?'Overconsumption breach also confirmed.':'No consumption breach (actual '+f2(STATE.avgCns,1)+' MT/day within ABT).'}
+      </div>
+      <div class="vsec"><strong>&#127754; GW Analysis:</strong>
+        <strong>${STATE.gw} hours</strong> qualifying good weather (BF&le;4 AND SWH&le;1.25m, Yellow Sea Days 28&ndash;37).
+        Per <em>The Ocean Virgo</em> [2015] EWHC 3405 minimum 24h threshold met (${STATE.gw}h &ge; 24h &check;).
+        Full voyage averaging per <em>The Gas Enterprise</em> [1993] 2 LLR 352.
+      </div>
+      <div class="vsec"><strong>&#128176; Calculation:</strong>
+        Time loss <strong>${f2(STATE.timeLoss,2)} days</strong> &times; $${STATE.hire.toLocaleString()}/day = <strong>${usd(STATE.timeLossVal)}</strong>.
+        Bunker saving offset: <strong>&minus; ${usd(STATE.bunkerSaving)}</strong>.
+        <strong>Net claim: ${usd(STATE.netClaim)}</strong>.
+        ${STATE.netClaim<STATE.lmaaThreshold?'Note: below LMAA Small Claims threshold ($'+STATE.lmaaThreshold.toLocaleString()+').':'Exceeds LMAA Small Claims threshold &mdash; full arbitration applicable.'}
+      </div>
+      <div class="vsec"><strong>&#128203; Recommendation:</strong>
+        Issue formal claim letter WITHOUT PREJUDICE SAVE AS TO COSTS applying <em>The Didymi</em> three-stage test. Demand response within 48 hours. Reserve all rights.
+      </div>`;
+  } else {
+    hd.classList.remove('viable');
+    tag.className='tag twarn tlg'; tag.textContent='SIN CLAIM MONETARIO';
+    body.innerHTML=`
+      <div class="vsec"><p>Based on current data, no net monetary claim arises from this voyage.
+        ${!STATE.hasSpeedBreach?'Speed within CP warranty. ':''}
+        ${!STATE.hasCnsBreach?'Consumption within CP warranty. ':''}
+        Net position: <strong>${usd(STATE.netClaim)}</strong>.</p></div>
+      <div class="vsec"><p>Economic underperformance exists but offsetting clause eliminates net monetary claim.
+        Consider reviewing future voyage CP terms to improve performance provisions.</p></div>`;
+  }
+}
+
+/* ═══════ STATE CONTEXT STRING ═══════ */
+function getCtx(){
+  return `CHARTER PARTY & VOYAGE CONTEXT
+Vessel: ${STATE.vessel||'CL Zhangjiajie'} (IMO ${STATE.imo||'9953365'})
+Charterers: ${STATE.charterers||'Horizon Shipping (Panama) Inc.'}
+Owners: ${STATE.owners||'Hong Glory Shipping Co. Ltd.'}
+CP Date: ${STATE.cpDate||'15 January 2025'}
+Hire Rate: USD ${STATE.hire.toLocaleString()}/day
+Governing Law: English Law, LMAA arbitration
+LMAA Small Claims Threshold: USD ${STATE.lmaaThreshold.toLocaleString()}
+Routing Company: ${STATE.routingCo||'Blue Water BOSS'}
+
+CP PERFORMANCE WARRANTIES (LADEN)
+Speed: ${STATE.cpSpdL} kts ABT \u00b1${STATE.abtSpd} kts
+Consumption: ${STATE.cpCnsL} MT/day VLSFO ABT \u00b1${STATE.abtCns}%
+Good Weather: BF\u22644 AND SWH\u22641.25m / 24h consecutive
+Assessment Basis: Sea buoy to sea buoy
+Offsetting Clause: ${STATE.offset==='yes'?'YES \u2014 bunker saving offsets time loss':'NO'}
+VLSFO Price (BOD): USD ${STATE.vlsfo}/MT
+
+VOYAGE DATA
+Route: Callao (Peru) \u2192 Qingdao (China) \u2014 Pacific Crossing
+Distance: ${STATE.dist.toLocaleString()} NM (sea buoy to sea buoy)
+Duration: ${STATE.duration} days
+Actual Avg Speed: ${f2(STATE.avgSpd,1)} kts
+Actual Avg Consumption: ${f2(STATE.avgCns,1)} MT/day
+Good Weather Hours: ${STATE.gw} hrs (Yellow Sea approach, Days 28-37)
+
+BREACH FLAGS
+Speed breach: ${STATE.hasSpeedBreach?'YES \u2014 '+f2(STATE.cpSpdL-STATE.avgSpd,1)+' kts shortfall beyond ABT':'NO'}
+Consumption breach: ${STATE.hasCnsBreach?'YES':'NO \u2014 actual under CP warranty'}
+
+CALCULATIONS
+Time at CP speed: ${f2(STATE.dist/STATE.cpSpdL/24,2)} days
+Time at actual speed: ${f2(STATE.dist/STATE.avgSpd/24,2)} days
+Time loss: ${f2(STATE.timeLoss,2)} days
+Time loss value: ${usd(STATE.timeLossVal)}
+Bunker saving: ${usd(STATE.bunkerSaving)} (deducted per offsetting clause)
+Overconsumption: ${usd(STATE.bunkerOvercons)}
+NET CLAIM: ${usd(STATE.netClaim)}
+
+CP CLAUSE TEXT:
+${STATE.clauseText||'(See Tab 1)'}`;
+}
+
+/* ═══════ API CALL ═══════ */
+async function callAPI(system, user, titleText){
+  document.getElementById('out-title').textContent=titleText;
+  const box=document.getElementById('out-box');
+  const key=document.getElementById('api-key').value.trim();
+  if(!key){
+    box.textContent='Please enter your Anthropic API key above.';
+    box.classList.add('muted'); return;
+  }
+  box.classList.add('muted');
+  let dots=0; box.textContent='Generating';
+  const timer=setInterval(()=>{dots=(dots+1)%4; box.textContent='Generating'+'.'.repeat(dots);},400);
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:system,
+        messages:[{role:'user',content:user}]
+      })
+    });
+    clearInterval(timer);
+    if(!res.ok){const e=await res.json(); box.textContent='API Error '+res.status+': '+(e.error?.message||res.statusText); return;}
+    const data=await res.json();
+    box.textContent=data.content[0].text;
+    box.classList.remove('muted');
+  }catch(e){clearInterval(timer); box.textContent='Error: '+e.message;}
+}
+
+function genClaimLetter(){
+  callAPI(
+    'You are a senior maritime lawyer specialising in English law charter party disputes and LMAA arbitration.',
+    getCtx()+`\n\nDraft a formal claim letter for speed underperformance. Requirements:\n1. Open WITHOUT PREJUDICE SAVE AS TO COSTS\n2. Apply The Didymi [1988] 2 LLR 108 three-stage test explicitly\n3. Address GW hours; cite The Ocean Virgo [2015] EWHC 3405 (${STATE.gw} hrs \u2265 24h \u2713)\n4. Cite The Gas Enterprise [1993] 2 LLR 352 for methodology\n5. Show full offsetting calculation clearly (time loss ${usd(STATE.timeLossVal)} minus bunker saving ${usd(STATE.bunkerSaving)} = net ${usd(STATE.netClaim)})\n6. Note LMAA Small Claims procedure if applicable\n7. Demand 48-hour response, reserve all rights\n8. Professional formal English, ready to dispatch`,
+    '\u2696 Claim Letter'
+  );
+}
+
+function genEconLoss(){
+  callAPI(
+    'Eres un experto en reclamaciones mar\u00edtimas y derecho de fletamento con especialidad en an\u00e1lisis econ\u00f3mico.',
+    getCtx()+`\n\nElabora un An\u00e1lisis de P\u00e9rdida Econ\u00f3mica completo en espa\u00f1ol:\n1. Confirmaci\u00f3n t\u00e9cnica del bajo rendimiento\n2. Qu\u00e9 cl\u00e1usulas del CP afectan la reclamaci\u00f3n\n3. Cuantificaci\u00f3n detallada de la p\u00e9rdida econ\u00f3mica en USD\n4. Impacto de la cl\u00e1usula de compensaci\u00f3n (offsetting)\n5. P\u00e9rdida bruta vs neta\n6. Acciones recomendadas para futuros viajes\n7. Mejoras sugeridas en cl\u00e1usulas CP\n8. Opciones legales residuales`,
+    '\ud83d\udcc9 An\u00e1lisis P\u00e9rdida Econ\u00f3mica'
+  );
+}
+
+function genLegalStrategy(){
+  callAPI(
+    'Eres un abogado mar\u00edtimo senior especializado en derecho ingl\u00e9s y arbitraje LMAA.',
+    getCtx()+`\n\nElabora una Estrategia Legal Completa en espa\u00f1ol:\n1. Veredicto inicial\n2. Fortalezas para los fletadores\n3. Debilidades y contraargumentos de los armadores\n4. Estrategia recomendada\n5. Redacci\u00f3n clave para carta de reclamaci\u00f3n\n6. Riesgos procesales (LMAA, costas, plazos)\n7. Pr\u00f3ximos pasos con timeline\n8. Probabilidad de \u00e9xito estimada`,
+    '\u2726 Estrategia Legal Completa'
+  );
+}
+
+function copyOut(btn){
+  navigator.clipboard.writeText(document.getElementById('out-box').textContent).then(()=>{
+    const orig=btn.textContent; btn.textContent='\u2713 Copied';
+    setTimeout(()=>btn.textContent=orig,2000);
+  });
+}
+
+function testKey(){
+  const k=document.getElementById('api-key').value.trim();
+  if(!k){alert('Enter an API key first.');return;}
+  alert('Key: '+k.substring(0,12)+'...\nFormat check: '+(k.startsWith('sk-ant-')?'\u2713 Valid format':'\u26a0 Unexpected format'));
+}
+
+/* ═══════ CHAT ═══════ */
+const chatHist=[];
+async function sendChat(){
+  const inp=document.getElementById('chat-inp');
+  const msg=inp.value.trim(); if(!msg) return;
+  inp.value='';
+  addMsg('user',msg);
+  chatHist.push({role:'user',content:msg});
+  const key=document.getElementById('api-key').value.trim();
+  if(!key){addMsg('ai','Please enter your Anthropic API key to enable AI responses.'); return;}
+  const lid='cl-'+Date.now();
+  addMsg('ai','...',lid);
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:1000,
+        system:'You are a maritime legal AI assistant with expertise in English law, charter party disputes, and LMAA arbitration. Case context:\n\n'+getCtx()+'\n\nBe concise and professional. Reference specific cases and calculations where relevant.',
+        messages:chatHist
+      })
+    });
+    const data=await res.json();
+    const reply=res.ok?data.content[0].text:'Error: '+(data.error?.message||res.statusText);
+    updMsg(lid,reply);
+    chatHist.push({role:'assistant',content:reply});
+  }catch(e){updMsg(lid,'Error: '+e.message);}
+}
+
+function addMsg(role,text,id){
+  const con=document.getElementById('chat-msgs');
+  const row=document.createElement('div');
+  row.className='msg-row'+(role==='user'?' user':'');
+  if(id) row.id=id;
+  const ava=document.createElement('div');
+  ava.className='ava '+(role==='user'?'ava-u':'ava-ai');
+  ava.textContent=role==='user'?'U':'AI';
+  const bub=document.createElement('div');
+  bub.className='bubble '+(role==='user'?'bub-u':'bub-ai');
+  bub.textContent=text;
+  row.appendChild(ava); row.appendChild(bub);
+  con.appendChild(row);
+  con.scrollTop=con.scrollHeight;
+}
+
+function updMsg(id,text){
+  const row=document.getElementById(id);
+  if(row) row.querySelector('.bubble').textContent=text;
+}
+
+/* ═══════ TOOLTIP ═══════ */
+function showTip(e,text){
+  const t=document.getElementById('chtip');
+  t.textContent=text; t.style.display='block';
+  t.style.left=(e.clientX+14)+'px'; t.style.top=(e.clientY-34)+'px';
+}
+function hideTip(){ document.getElementById('chtip').style.display='none'; }
+
+/* ═══════ INIT ═══════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  updateChip();
+  runCalc();
+});
+</script>
+</body>
+</html>
