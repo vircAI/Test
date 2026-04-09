@@ -177,6 +177,38 @@ nav{position:sticky;top:0;z-index:100;background:var(--white);border-bottom:.5px
 /* MISC */
 .ph{font-size:15px;font-weight:500;margin-bottom:3px;}
 .psub{font-size:11px;color:var(--t3);margin-bottom:16px;}
+/* TAB-3 SUPPLEMENT */
+.card-h{padding:10px 15px;border-bottom:.5px solid var(--border);font-size:12px;font-weight:500;}
+.risk-val{font-size:16px;font-weight:600;font-family:var(--mono);color:var(--text);margin:3px 0;}
+.risk-sub{font-size:10px;color:var(--t3);margin-top:1px;}
+.risk-box.rl{border-color:var(--red);}
+.risk-box.gl{border-color:var(--green);}
+.risk-box.aml{border-color:var(--amber);}
+.pill{display:inline-flex;font-size:10px;font-weight:500;padding:2px 8px;border-radius:4px;border:.5px solid;white-space:nowrap;}
+.pill-g{background:var(--gl);color:var(--green);border-color:var(--gm);}
+.pill-r{background:var(--rl);color:var(--red);border-color:var(--rm);}
+.pill-a{background:var(--aml);color:var(--amber);border-color:var(--amm);}
+.pill-b{background:var(--al);color:var(--accent);border-color:var(--am);}
+.arg-desc{font-size:11px;color:var(--t2);line-height:1.65;}
+.dots{display:flex;gap:3px;align-items:center;justify-content:center;}
+.dots span{width:5px;height:5px;border-radius:50%;background:var(--t3);animation:td 1s infinite;}
+.dots span:nth-child(2){animation-delay:.2s;}
+.dots span:nth-child(3){animation-delay:.4s;}
+.inp{font-size:12px;padding:6px 9px;border-radius:var(--r);border:.5px solid var(--border);background:var(--bg);color:var(--text);font-family:var(--sans);outline:none;}
+.inp:focus{border-color:var(--accent);background:var(--white);}
+.tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.tbl th{font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);padding:7px 11px;border-bottom:.5px solid var(--border);background:var(--bg);}
+.tbl td{padding:7px 11px;border-bottom:.5px solid var(--border);color:var(--t2);vertical-align:top;}
+.tbl tbody tr:last-child td{border-bottom:none;}
+.tbl tbody tr:hover td{background:var(--bg);}
+.claim-box{background:var(--bg);border:.5px solid var(--border);border-radius:var(--r);border-left:3px solid var(--accent);overflow-y:auto;max-height:500px;}
+.claim-section{padding:14px 18px;border-bottom:.5px solid var(--border);}
+.claim-section:last-child{border-bottom:none;}
+.claim-sh{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--accent);margin-bottom:5px;}
+.claim-p{font-size:12px;color:var(--text);line-height:1.7;}
+.claim-calc{background:var(--white);border:.5px solid var(--border);border-radius:6px;padding:9px 13px;margin:8px 0;font-family:var(--mono);font-size:11px;color:var(--t2);line-height:2;}
+.claim-calc strong{color:var(--text);}
+.slabel{font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);margin-bottom:5px;}
 </style>
 </head><body>
 <nav>
@@ -584,10 +616,13 @@ ALL ABOVE SPEEDS/CONSUMPTIONS GIVEN FROM BEGINNING TO END OF SEA PASSAGE, AT OPE
 
 <!-- ════════════════ TAB 3 ════════════════ -->
 <div class="sc" id="t-analysis"><div class="wrap">
+<div class="ph">AI Analysis &amp; Claim</div>
+<div class="psub">MV Yangtze Brightness &middot; BTB Gloria Confidence &middot; Claim USD 62,350 &middot; LMAA Small Claims</div>
 
 <!-- VERDICT CARD -->
 <div class="card" style="border-left:4px solid var(--red);">
-  <div class="card-h">Veredicto de Caso</div>
+  <div class="ch"><div class="ct">Veredicto de Caso</div></div>
+  <div class="cb">
   <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;">
     <div style="flex:1;min-width:240px;">
       <div class="slabel">Resultado del Análisis</div>
@@ -604,11 +639,13 @@ ALL ABOVE SPEEDS/CONSUMPTIONS GIVEN FROM BEGINNING TO END OF SEA PASSAGE, AT OPE
       <div class="risk-box aml"><div class="risk-title">Procedimiento</div><div class="risk-val">LMAA Small Claims</div><div class="risk-sub">Costes reducidos, decisión rápida</div></div>
     </div>
   </div>
+  </div>
 </div>
 
 <!-- ARGUMENTS CARD -->
 <div class="card">
-  <div class="card-h">Argumentos Jurídicos — Test Didymi (3 Etapas)</div>
+  <div class="ch"><div class="ct">Argumentos Jurídicos — Test Didymi (3 Etapas)</div><div class="cst">Base jurídica de la reclamación</div></div>
+  <div class="cb">
   <div class="arg-step">
     <div class="arg-num">1</div>
     <div class="arg-body">
@@ -674,11 +711,13 @@ ALL ABOVE SPEEDS/CONSUMPTIONS GIVEN FROM BEGINNING TO END OF SEA PASSAGE, AT OPE
       </div>
     </div>
   </div>
+  </div>
 </div>
 
 <!-- GW PROBLEM CARD -->
 <div class="card">
-  <div class="card-h">Análisis del Problema GW — Distribución de Velocidades</div>
+  <div class="ch"><div class="ct">Análisis del Problema GW — Distribución de Velocidades</div><div class="cst">42 observaciones GW &middot; BF&le;4 SWH&le;1.25m</div></div>
+  <div class="cb">
   <div style="font-size:12px;color:var(--t2);margin-bottom:12px;">42 puntos de velocidad en buena meteorología (BF≤4, SWH≤1.25m). Solo 2 de 42 reportes alcanzan CP (≥12.0 kts). El patrón es consistente con degradación mecánica progresiva.</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
     <div class="risk-box rl">
@@ -712,117 +751,113 @@ ALL ABOVE SPEEDS/CONSUMPTIONS GIVEN FROM BEGINNING TO END OF SEA PASSAGE, AT OPE
     <div class="risk-title">Riesgo: Discrepancia en Datos Meteorológicos</div>
     <div style="font-size:12px;color:var(--t2);margin-top:4px;line-height:1.5;">El armador podría impugnar la clasificación GW de 3 reportes marcados como "⚑ Potential". Recomendación: Obtener datos ECMWF/Copernicus para corroborar los datos del Capitán. En cualquier caso, los 2 reportes GW indiscutidos (09F, 10F) por sí solos muestran 10.76 kts vs 12.00 kts.</div>
   </div>
+  </div>
 </div>
-
 
 <!-- CLAIM WORDING CARD -->
 <div class="card">
-  <div class="card-h">Redacción de Reclamación — Borrador Carta</div>
-  <div class="claim-box" id="claim-draft">8 April 2026
-
-BTB Transport S.A.
-Owners / Disponent Owners
-MV Yangtze Brightness (IMO 9953365)
-CP: BTB Gloria Confidence dated 14 February 2025
-
-Dear Sirs,
-
-RE: SPEED CLAIM — VOYAGE PATACHE TO JINZHOU
-    CP CLAUSE 16 — UNDERPERFORMANCE IN GOOD WEATHER CONDITIONS
-    CLAIM: USD 62,350
-
-We write on behalf of Charterers, BTB Transport S.A., in connection with the above voyage.
-
-1. FACTUAL BACKGROUND
-
-MV Yangtze Brightness (IMO 9953365) performed the voyage from Puerto Patache, Chile to Jinzhou,
-China under the terms of the BTB Gloria Confidence Charter Party dated 14 February 2025.
-
-The vessel departed Patache on 9 February 2025 at 15:00 LT and arrived at Jinzhou anchorage on
-3 April 2025 at 04:00 LT. The total sea distance was 10,787 nautical miles.
-
-2. CONTRACTUAL WARRANTIES (CP CLAUSE 16)
-
-The Charter Party warrants vessel speed of "about 12.00 knots on a consumption of about 28.0 MT
-IFO 380" in good weather conditions, defined as Beaufort Scale ≤4 and Significant Wave Height
-≤1.25 metres. The "about" allowance (ABT) is ±0.5 knots, establishing a minimum warranted speed
-floor of 11.50 knots for the purpose of determining breach only.
-
-3. GOOD WEATHER PERFORMANCE
-
-Applying the methodology established in The Didymi [1988] 2 Lloyd's Rep 108 and The Ocean Virgo
-[2015] EWHC 3405:
-
-  Good weather period identified: 09 Feb 15:00 — 10 Feb 23:30 (32.5 consecutive hours)
-  Location: Yellow Sea / approaches to Jinzhou
-  Conditions: BF ≤3, SWH ≤0.9m throughout
-  Observed speed (GW average): 10.76 knots
-  
-This sample of 32.5 hours substantially exceeds the 14–16 hour threshold confirmed in The Ocean
-Virgo [2015] as sufficient for extrapolation purposes.
-
-4. BREACH OF WARRANTY
-
-The observed good weather speed of 10.76 knots falls below the ABT floor of 11.50 knots,
-establishing breach of the speed warranty under CP Clause 16.
-
-5. QUANTUM — METHODOLOGY (ABT CORRECTLY APPLIED)
-
-We emphasise that the ABT tolerance has ONE function only: determining whether a breach exists.
-Once breach is confirmed, quantum is calculated against the FULL warranted speed (12.00 knots),
-not against the ABT floor. Calculating quantum against the ABT floor (11.50 knots) would
-constitute impermissible double-counting of the ABT allowance.
-
-  Time actually taken:  10,787 NM ÷ 10.76 kts = 1,002.3 hours
-  Time warranted:       10,787 NM ÷ 12.00 kts =   899.0 hours
-  Time lost:                                         103.3 hours
-
-  Hire rate: USD 19,167 per day = USD 798.63 per hour
-  
-  Claim: 103.3 hrs × USD 798.63 = USD 62,350
-
-(For reference only: the incorrect calculation against the ABT floor would yield USD 38,860,
-understating the true loss by USD 23,490.)
-
-6. EXTRAPOLATION PRINCIPLE
-
-Pursuant to The Gas Enterprise [1993] 2 Lloyd's Rep 352, the underperformance identified in
-good weather conditions is extrapolated across the full voyage from sea buoy to sea buoy.
-The owners have not identified any mechanical defect or exceptional circumstances that would
-explain or excuse the underperformance.
-
-7. DEMAND
-
-Charterers hereby formally demand payment of USD 62,350 (sixty-two thousand three hundred and
-fifty United States Dollars) within 14 days of this letter, failing which Charterers reserve
-all rights, including the right to commence arbitration proceedings under the LMAA Small Claims
-Procedure 2021 (as the claim falls below the USD 100,000 threshold).
-
-Interest under section 49 of the Arbitration Act 1996 will be claimed from the date of this
-letter at a commercial rate.
-
-We look forward to your prompt response.
-
-Yours faithfully,
-
-[CHARTERERS' SOLICITORS / P&I CLUB]
-On behalf of BTB Transport S.A.
-
-ENCLOSURES:
-  1. Noon report extract (46 reports, 9 Feb — 3 Apr 2025)
-  2. Speed/weather analysis summary
-  3. Good weather period identification (32.5 hrs, Yellow Sea)
-  4. Quantum calculation (corrected ABT methodology)
-  5. CP Clause 16 (BTB Gloria Confidence, 14 Feb 2025)</div>
-  <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-    <button class="btn btnp" onclick="copyDraft()">Copiar Borrador</button>
-    <button class="btn btns" onclick="runAI('claim')">Mejorar con AI &rarr;</button>
+  <div class="ch">
+    <div><div class="ct">Redacci&oacute;n de Reclamaci&oacute;n &mdash; Borrador Carta</div><div class="cst">Listo para enviar &middot; Basado en an&aacute;lisis BOSS Ref 493896</div></div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btnp" style="font-size:11px;" onclick="copyDraft()">Copiar</button>
+      <button class="btn btns" style="font-size:11px;" onclick="runAI('claim')">Mejorar con AI</button>
+    </div>
+  </div>
+  <div class="claim-box" id="claim-draft">
+    <!-- DATE + ADDRESSEE -->
+    <div class="claim-section" style="background:var(--bg);display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div class="claim-p" style="font-weight:500;font-size:13px;">BTB Transport S.A.</div>
+        <div class="claim-p" style="color:var(--t2);margin-top:2px;">Owners / Disponent Owners</div>
+        <div class="claim-p" style="color:var(--t2);">MV Yangtze Brightness (IMO 9953365)</div>
+        <div class="claim-p" style="color:var(--t2);">CP: BTB Gloria Confidence dated 14 February 2025</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="claim-p" style="font-family:var(--mono);color:var(--t3);">8 April 2026</div>
+        <div style="margin-top:6px;"><span class="tag tbad" style="font-size:11px;">USD 62,350</span></div>
+      </div>
+    </div>
+    <!-- SUBJECT -->
+    <div class="claim-section" style="background:var(--rl);border-left:none;">
+      <div style="font-size:11px;color:#7a1515;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Re: Speed Claim &mdash; Voyage Patache to Jinzhou</div>
+      <div style="font-size:11px;color:#7a1515;">CP Clause 16 &mdash; Underperformance in Good Weather Conditions &mdash; <strong>Claim: USD 62,350</strong></div>
+    </div>
+    <!-- OPENING -->
+    <div class="claim-section">
+      <div class="claim-p">Dear Sirs,</div>
+      <div class="claim-p" style="margin-top:8px;">We write on behalf of Charterers, BTB Transport S.A., in connection with the above voyage performed under the BTB Gloria Confidence Charter Party dated 14 February 2025.</div>
+    </div>
+    <!-- 1. FACTUAL BACKGROUND -->
+    <div class="claim-section">
+      <div class="claim-sh">1. Factual Background</div>
+      <div class="claim-p">MV Yangtze Brightness (IMO 9953365) performed the voyage from Puerto Patache, Chile to Jinzhou, China under the terms of the BTB Gloria Confidence Charter Party dated 14 February 2025.</div>
+      <div class="claim-p" style="margin-top:6px;">The vessel departed Patache on <strong>9 February 2025 at 15:00 LT</strong> and arrived at Jinzhou anchorage on <strong>3 April 2025 at 04:00 LT</strong>. The total sea distance was <strong>10,787 nautical miles</strong>.</div>
+    </div>
+    <!-- 2. WARRANTIES -->
+    <div class="claim-section">
+      <div class="claim-sh">2. Contractual Warranties (CP Clause 16)</div>
+      <div class="claim-p">The Charter Party warrants vessel speed of <strong>"about 12.00 knots on a consumption of about 28.0 MT IFO 380"</strong> in good weather conditions, defined as Beaufort Scale &le;4 and Significant Wave Height &le;1.25 metres.</div>
+      <div class="claim-p" style="margin-top:6px;">The &ldquo;about&rdquo; allowance (ABT) is &plusmn;0.5 knots, establishing a minimum warranted speed floor of <strong>11.50 knots for the purpose of determining breach only</strong>. Once breach is established, quantum is always calculated against the full warranted speed of 12.00 knots.</div>
+    </div>
+    <!-- 3. GW PERFORMANCE -->
+    <div class="claim-section">
+      <div class="claim-sh">3. Good Weather Performance</div>
+      <div class="claim-p">Applying the methodology established in <em>The Didymi</em> [1988] 2 Lloyd&apos;s Rep 108 and <em>The Ocean Virgo</em> [2015] EWHC 3405, we identify the following good weather period:</div>
+      <div class="claim-calc">
+        <div><strong>Period:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;09 Feb 15:00 &mdash; 10 Feb 23:30 (32.5 consecutive hours)</div>
+        <div><strong>Location:</strong>&nbsp;&nbsp;Yellow Sea / approaches to Jinzhou</div>
+        <div><strong>Conditions:</strong> BF &le;3, SWH &le;0.9m throughout</div>
+        <div><strong>Obs. speed:</strong> 10.76 knots (weighted average)</div>
+      </div>
+      <div class="claim-p">This sample of 32.5 hours substantially exceeds the 14&ndash;16 hour threshold confirmed in <em>The Ocean Virgo</em> [2015] as sufficient for extrapolation purposes.</div>
+    </div>
+    <!-- 4. BREACH -->
+    <div class="claim-section">
+      <div class="claim-sh">4. Breach of Warranty</div>
+      <div class="claim-p">The observed good weather speed of <strong>10.76 knots</strong> falls below the ABT floor of <strong>11.50 knots</strong>, establishing breach of the speed warranty under CP Clause 16. The shortfall of 1.24 knots (-10.3%) exceeds the ABT tolerance.</div>
+    </div>
+    <!-- 5. QUANTUM -->
+    <div class="claim-section">
+      <div class="claim-sh">5. Quantum &mdash; Methodology (ABT Correctly Applied)</div>
+      <div class="claim-p">We emphasise that the ABT tolerance has <strong>one function only</strong>: determining whether a breach exists. Once breach is confirmed, quantum is calculated against the <strong>full warranted speed (12.00 knots)</strong>, not against the ABT floor. Calculating quantum against 11.50 knots would constitute impermissible double-counting of the ABT allowance.</div>
+      <div class="claim-calc">
+        <div>Time actually taken:&nbsp;&nbsp; 10,787 NM &divide; 10.76 kts &nbsp;= <strong>1,002.3 hours</strong></div>
+        <div>Time warranted:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10,787 NM &divide; 12.00 kts &nbsp;= &nbsp;&nbsp;&nbsp;<strong>899.0 hours</strong></div>
+        <div style="border-top:.5px solid var(--border);margin-top:4px;padding-top:4px;">Time lost:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = &nbsp;&nbsp;&nbsp;<strong>103.3 hours</strong></div>
+        <div style="margin-top:4px;">Hire rate: USD 19,167/day = <strong>USD 798.63/hour</strong></div>
+        <div style="border-top:.5px solid var(--border);margin-top:4px;padding-top:6px;font-size:13px;color:var(--red);font-weight:600;">CLAIM: 103.3 hrs &times; USD 798.63 = <strong>USD 62,350</strong></div>
+      </div>
+      <div class="claim-p" style="color:var(--t3);font-size:11px;">For reference only: the incorrect calculation against ABT floor (11.50 kts) would yield USD 38,860 &mdash; understating the true loss by USD 23,490.</div>
+    </div>
+    <!-- 6. EXTRAPOLATION -->
+    <div class="claim-section">
+      <div class="claim-sh">6. Extrapolation Principle</div>
+      <div class="claim-p">Pursuant to <em>The Gas Enterprise</em> [1993] 2 Lloyd&apos;s Rep 352, the underperformance identified in good weather conditions is extrapolated across the full voyage from sea buoy to sea buoy. Owners have not identified any mechanical defect or exceptional circumstances that would explain or excuse the underperformance.</div>
+    </div>
+    <!-- 7. DEMAND -->
+    <div class="claim-section">
+      <div class="claim-sh">7. Formal Demand</div>
+      <div class="claim-p">Charterers hereby formally demand payment of <strong>USD 62,350</strong> (sixty-two thousand three hundred and fifty United States Dollars) within <strong>14 days</strong> of this letter, failing which Charterers reserve all rights, including the right to commence arbitration proceedings under the <strong>LMAA Small Claims Procedure 2021</strong> (the claim falls below the USD 100,000 threshold).</div>
+      <div class="claim-p" style="margin-top:6px;">Interest under section 49 of the Arbitration Act 1996 will be claimed from the date of this letter at a commercial rate.</div>
+    </div>
+    <!-- SIGN OFF -->
+    <div class="claim-section">
+      <div class="claim-p">We look forward to your prompt response.</div>
+      <div class="claim-p" style="margin-top:10px;">Yours faithfully,</div>
+      <div class="claim-p" style="margin-top:16px;color:var(--t3);">[CHARTERERS&apos; SOLICITORS / P&amp;I CLUB]<br>On behalf of BTB Transport S.A.</div>
+    </div>
+    <!-- ENCLOSURES -->
+    <div class="claim-section" style="background:var(--bg);">
+      <div class="claim-sh">Enclosures</div>
+      <div class="claim-p" style="color:var(--t2);">1. Noon report extract (46 reports, 9 Feb &mdash; 3 Apr 2025)<br>2. Speed/weather analysis summary (BOSS Ref 493896)<br>3. Good weather period identification (32.5 hrs, Yellow Sea)<br>4. Quantum calculation (corrected ABT methodology)<br>5. CP Clause 16 (BTB Gloria Confidence, 14 Feb 2025)</div>
+    </div>
   </div>
 </div>
 
 <!-- AI GENERATE CARD -->
 <div class="card">
-  <div class="card-h">Análisis AI — Generación Asistida</div>
+  <div class="ch"><div class="ct">Análisis AI — Generación Asistida</div><div class="cst">claude-sonnet-4-20250514</div></div>
+  <div class="cb">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
     <button class="btn btnp" style="width:100%" onclick="runAI('claim')">Analizar Reclamación</button>
     <button class="btn btns" style="width:100%" onclick="runAI('noclaim')">Análisis Anti-Reclamación</button>
@@ -840,11 +875,13 @@ ENCLOSURES:
     </div>
   </div>
   <div style="font-size:10px;color:var(--t3);margin-top:8px;">Requiere API key de Anthropic configurada en el servidor. Modelo: claude-sonnet-4-20250514.</div>
+  </div>
 </div>
 
 <!-- CHAT CARD -->
 <div class="card">
-  <div class="card-h">Chat Rápido — Preguntas sobre el Caso</div>
+  <div class="ch"><div class="ct">Chat Rápido — Preguntas sobre el Caso</div></div>
+  <div class="cb">
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
     <button class="btn btns" style="font-size:11px;" onclick="setQ('¿Cuál es el impacto si el armador alega corriente favorable del Kuroshio en el Pacífico Norte?')">Corriente Kuroshio</button>
     <button class="btn btns" style="font-size:11px;" onclick="setQ('¿Qué ocurre si el armador impugna los 3 reportes GW marcados como potenciales?')">Impugnar GW</button>
@@ -861,12 +898,14 @@ ENCLOSURES:
     <input id="chatIn" class="inp" style="flex:1" placeholder="Pregunta sobre el caso…" onkeydown="if(event.key==='Enter')sendChat()">
     <button class="btn btnp" onclick="sendChat()">Enviar</button>
   </div>
+  </div>
 </div>
 
 <!-- JURISPRUDENCE CARD -->
 <div class="card">
-  <div class="card-h">Jurisprudencia Aplicable</div>
-  <table class="tbl">
+  <div class="ch"><div class="ct">Jurisprudencia Aplicable</div><div class="cst">English law &middot; LMAA</div></div>
+  <div class="tw">
+  <table class="dt">
     <thead><tr><th>Caso</th><th>Año</th><th>Principio</th><th>Aplicación</th></tr></thead>
     <tbody>
       <tr><td class="str">The Didymi</td><td class="mono">[1988] 2 LLR 108</td><td>Test de 3 etapas para reclamaciones de velocidad</td><td>Estructura base de toda la reclamación</td></tr>
@@ -877,6 +916,7 @@ ENCLOSURES:
       <tr><td class="str">The Leonidas D</td><td class="mono">[1985] 2 LLR 18</td><td>Condiciones de buena meteorología — estándar</td><td>Criterios BF≤4, SWH≤1.25m para clasificación GW</td></tr>
     </tbody>
   </table>
+  </div>
 </div>
 
 </div></div><!-- /t-analysis -->
